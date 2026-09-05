@@ -1,0 +1,38 @@
+{
+  "name": "RC Sails — Scoring",
+  "short_name": "RC Sails",
+  "description": "Calcolo dei punteggi di regata per vela radiocomandata secondo le RRS 2025-2028 e l'Appendice E. Funziona senza connessione; i dati restano sul dispositivo.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F4F6FA",
+  "theme_color": "#1B3A6B",
+  "categories": [
+    "sports",
+    "utilities",
+    "productivity"
+  ],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

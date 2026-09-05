@@ -1,0 +1,3295 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1B3A6B">
+<meta name="description" content="Calcolo punteggi di regata per vela radiocomandata secondo le RRS 2025-2028.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon-192.png" sizes="192x192">
+<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="RC Sails">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>RC Sails — Scoring</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;900&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#1B3A6B;--blue:#2563A8;--red:#C0281A;--gold:#D4A017;
+  --white:#FFFFFF;--gray1:#F4F6FA;--gray2:#E8ECF4;--gray3:#B0BAD0;
+  --gray4:#6B7A99;--dark:#0D1F3C;
+  --green:#27AE60;--orange:#E67E22;--purple:#6C3483;
+  --r: .75rem;--rr:1.25rem;
+  --shadow: 0 2px 12px rgba(13,31,60,.15);
+  --shadow-lg: 0 8px 32px rgba(13,31,60,.25);
+  --nav-h:68px;
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-t: env(safe-area-inset-top, 0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:"Barlow",sans-serif;color:var(--dark)}
+/* ── NAV ── */
+#nav{
+  position:fixed;bottom:0;left:0;right:0;height:calc(var(--nav-h) + var(--safe-b));
+  padding-bottom:var(--safe-b);
+  background:var(--navy);display:flex;align-items:stretch;
+  box-shadow:0 -2px 16px rgba(13,31,60,.3);z-index:100;
+  border-top:2px solid var(--blue);
+}
+.nav-btn{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;gap:4px;background:none;border:none;
+  color:var(--gray3);cursor:pointer;transition:.2s;padding:8px 4px;
+  font-family:"Barlow Condensed",sans-serif;font-size:.65rem;font-weight:700;
+  letter-spacing:.08em;text-transform:uppercase;
+}
+.nav-btn .icon{font-size:1.4rem;line-height:1}
+.nav-btn.active{color:var(--gold)}
+.nav-btn.active .icon{filter:drop-shadow(0 0 6px var(--gold))}
+/* ── PAGES ── */
+#app{position:fixed;top:0;left:0;right:0;bottom:calc(var(--nav-h) + var(--safe-b));overflow:hidden}
+.page{
+  position:absolute;inset:0;overflow-y:auto;
+  display:none;flex-direction:column;
+  -webkit-overflow-scrolling:touch;
+}
+.page.active{display:flex}
+/* ── HEADER ── */
+.page-header{
+  background:var(--navy);padding:calc(16px + var(--safe-t)) 20px 14px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:10;
+  box-shadow:0 2px 8px rgba(13,31,60,.3);
+  flex-shrink:0;
+}
+.page-header img{width:44px;height:44px;border-radius:50%}
+.page-header-text h1{
+  font-family:"Barlow Condensed",sans-serif;font-size:1.2rem;
+  font-weight:900;color:var(--white);letter-spacing:.04em;text-transform:uppercase;
+}
+.page-header-text p{font-size:.75rem;color:var(--gray3);margin-top:2px}
+.header-badge{
+  margin-left:auto;background:var(--gold);color:var(--dark);
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  font-size:.75rem;padding:4px 10px;border-radius:20px;letter-spacing:.06em;
+}
+/* ── CARDS ── */
+.card{
+  background:var(--white);border-radius:var(--rr);
+  box-shadow:var(--shadow);margin:0 16px 12px;overflow:hidden;
+}
+.card-header{
+  background:var(--navy);color:var(--white);
+  padding:10px 16px;font-family:"Barlow Condensed",sans-serif;
+  font-weight:700;font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;
+  display:flex;align-items:center;gap:8px;
+}
+.card-body{padding:16px}
+/* ── FORMS ── */
+.field{margin-bottom:14px}
+.field label{
+  display:block;font-size:.75rem;font-weight:600;color:var(--gray4);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px;
+}
+.field input,.field select{
+  width:100%;padding:12px 14px;border:2px solid var(--gray2);
+  border-radius:var(--r);font-family:"Barlow",sans-serif;font-size:1rem;
+  background:var(--white);color:var(--dark);outline:none;transition:.2s;
+  -webkit-appearance:none;
+}
+.field input:focus,.field select:focus{border-color:var(--blue)}
+.field-row{display:flex;gap:10px}
+.field-row>.field{flex:1;min-width:0}
+.hint{font-size:.68rem;color:var(--gray4);line-height:1.35;margin-top:5px}
+.sub-head{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.72rem;
+  letter-spacing:.09em;text-transform:uppercase;color:var(--blue);
+  padding:14px 0 8px;margin-top:6px;border-top:1px solid var(--gray2);
+}
+.sub-head:first-child{border-top:none;margin-top:0;padding-top:0}
+.rule-ref{
+  display:inline-block;background:var(--gray2);color:var(--gray4);
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.6rem;
+  padding:1px 6px;border-radius:10px;letter-spacing:.05em;margin-left:6px;
+}
+.code-tag{font-size:.58rem;font-weight:900;margin-left:1px}
+/* ══ DOCUMENTI UFFICIALI ══════════════════════════════════════════ */
+#print-area{display:none}
+@media screen{ body.printing #print-area{display:none} }
+@media print{
+  @page{ size:A4 portrait; margin:12mm 10mm; }
+  html,body{height:auto;overflow:visible;background:#fff}
+  body>*:not(#print-area){display:none !important}
+  #print-area{display:block !important;position:static;
+    font-family:"Barlow",sans-serif;color:#000;font-size:9pt;line-height:1.35}
+  .doc-head{display:flex;align-items:flex-start;gap:10mm;
+    border-bottom:2.5pt solid #1B3A6B;padding-bottom:3mm;margin-bottom:5mm}
+  .doc-logo{width:17mm;height:17mm;object-fit:contain;flex-shrink:0}
+  .doc-head-txt{flex:1}
+  .doc-club{font-family:"Barlow Condensed",sans-serif;font-weight:900;
+    font-size:16pt;letter-spacing:.04em;text-transform:uppercase;color:#1B3A6B;line-height:1.1}
+  .doc-cls{background:#1B3A6B;color:#fff;font-size:9pt;padding:0 2mm;
+    border-radius:2mm;vertical-align:middle;letter-spacing:.06em}
+  .doc-event{font-size:11pt;font-weight:600;margin-top:.6mm}
+  .doc-meta{font-size:8.5pt;color:#444;margin-top:.4mm}
+  .doc-title{font-family:"Barlow Condensed",sans-serif;font-weight:900;
+    font-size:14pt;text-transform:uppercase;text-align:right;color:#1B3A6B;
+    letter-spacing:.05em;line-height:1.05;flex-shrink:0}
+  .doc-sec{margin-bottom:6mm;break-inside:avoid}
+  .doc-sec h2{font-family:"Barlow Condensed",sans-serif;font-size:12pt;
+    text-transform:uppercase;letter-spacing:.06em;color:#1B3A6B;margin-bottom:1.5mm}
+  .doc-status{font-family:"Barlow Condensed",sans-serif;font-weight:700;
+    font-size:9.5pt;letter-spacing:.05em;padding:1.4mm 3mm;margin-bottom:2mm;
+    text-transform:uppercase;border-left:3pt solid #1B3A6B;background:#F0F3F9}
+  .doc-status.prov{border-left-color:#C0281A;background:#FCF0EE;color:#8A1E12}
+  .doc-tab{width:100%;border-collapse:collapse;font-size:8.5pt}
+  .doc-tab th{background:#1B3A6B;color:#fff;font-family:"Barlow Condensed",sans-serif;
+    font-weight:700;font-size:8pt;padding:1.3mm 1.6mm;text-align:left;
+    letter-spacing:.04em;text-transform:uppercase}
+  .doc-tab td{padding:1.1mm 1.6mm;border-bottom:.4pt solid #C8D0E0}
+  .doc-tab tr.podio td{background:#F7F9FC}
+  .doc-tab .c{text-align:center}
+  .doc-tab .b{font-weight:700}
+  .doc-tab .sc{color:#777}
+  .doc-tab .ann{color:#999;font-style:italic}
+  .doc-tab sup{font-size:6pt;font-weight:700;margin-left:.3mm}
+  .doc-tab-def th.k{background:#F0F3F9;color:#1B3A6B;width:32mm;
+    vertical-align:top;border-bottom:.4pt solid #C8D0E0}
+  .doc-tab-def td{vertical-align:top}
+  .doc-note{font-size:7.5pt;color:#444;margin-top:1.6mm;line-height:1.45}
+  .doc-foot{margin-top:8mm;padding-top:3mm;border-top:.6pt solid #999;
+    display:flex;justify-content:space-between;align-items:flex-end;
+    font-size:8pt;break-inside:avoid}
+  .doc-firma{width:70mm}
+  .doc-firma .doc-nome{font-weight:600;margin-top:1mm;min-height:4mm}
+  .doc-firma .doc-riga{border-bottom:.6pt solid #000;margin-top:1mm}
+  .doc-gen{text-align:right;color:#666;font-size:7pt}
+  thead{display:table-header-group}
+  tr{break-inside:avoid}
+}
+/* ── BUTTONS ── */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  padding:13px 20px;border-radius:var(--r);border:none;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:1rem;letter-spacing:.06em;text-transform:uppercase;
+  transition:.15s;-webkit-tap-highlight-color:transparent;
+}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--navy);color:var(--white)}
+.btn-red{background:var(--red);color:var(--white)}
+.btn-gold{background:var(--gold);color:var(--dark)}
+.btn-outline{background:transparent;color:var(--navy);border:2px solid var(--navy)}
+.btn-sm{padding:8px 14px;font-size:.8rem}
+.btn-block{width:100%}
+/* ── TOGGLE ── */
+.toggle-row{display:flex;gap:8px;background:var(--gray2);border-radius:var(--r);padding:4px}
+.toggle-btn{
+  flex:1;padding:9px;border:none;border-radius:8px;cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.85rem;
+  background:transparent;color:var(--gray4);transition:.2s;letter-spacing:.04em;
+}
+.toggle-btn.active{background:var(--white);color:var(--navy);box-shadow:var(--shadow)}
+/* ── BOAT LIST ── */
+.boat-item{
+  display:flex;align-items:center;gap:10px;
+  padding:12px 0;border-bottom:1px solid var(--gray2);
+}
+.boat-item:last-child{border-bottom:none}
+.sail-badge{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.1rem;
+  color:var(--white);background:var(--navy);
+  min-width:44px;height:44px;border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.sail-badge.fleet-b{background:var(--blue)}
+.boat-info{flex:1;min-width:0}
+.boat-name{font-weight:600;font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.boat-sub{font-size:.75rem;color:var(--gray4);margin-top:2px}
+.fleet-pill{
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.7rem;
+  padding:3px 8px;border-radius:20px;flex-shrink:0;
+}
+.fleet-pill.A{background:#E8F0FC;color:var(--navy)}
+.fleet-pill.B{background:#E0F5EE;color:var(--teal,#117A65)}
+.delete-btn{
+  width:36px;height:36px;border-radius:50%;border:none;
+  background:var(--gray2);color:var(--gray4);cursor:pointer;
+  font-size:1rem;display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;transition:.2s;
+}
+.delete-btn:active{background:var(--red);color:var(--white)}
+/* ── RACE INPUT ── */
+.race-tabs{
+  display:flex;gap:0;overflow-x:auto;padding:12px 16px 0;
+  scrollbar-width:none;flex-shrink:0;
+}
+.race-tabs::-webkit-scrollbar{display:none}
+.race-tab{
+  flex-shrink:0;padding:8px 16px;border-radius:var(--r) var(--r) 0 0;
+  border:none;background:var(--gray2);color:var(--gray4);cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.85rem;
+  margin-right:4px;transition:.2s;position:relative;
+}
+.race-tab.active{background:var(--white);color:var(--navy)}
+.race-tab .dot{
+  position:absolute;top:5px;right:5px;width:6px;height:6px;
+  border-radius:50%;background:var(--green);
+}
+/* ── FINISH ORDER ── */
+.finish-grid{display:flex;flex-direction:column;gap:6px}
+.finish-slot{
+  display:flex;align-items:center;gap:10px;
+  background:var(--gray1);border-radius:var(--r);padding:8px 12px;
+  border:2px solid transparent;transition:.2s;
+}
+.finish-slot.filled{background:var(--white);border-color:var(--gray2)}
+.slot-pos{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.1rem;
+  color:var(--gold);min-width:28px;
+}
+.slot-boat{
+  flex:1;font-weight:600;font-size:.95rem;
+}
+.slot-clear{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:var(--gray2);color:var(--gray4);cursor:pointer;
+  font-size:.9rem;display:flex;align-items:center;justify-content:center;
+}
+/* ── BOAT PICKER ── */
+.picker-overlay{
+  position:fixed;inset:0;background:rgba(13,31,60,.6);
+  z-index:200;display:flex;flex-direction:column;justify-content:flex-end;
+  backdrop-filter:blur(2px);
+}
+.picker-sheet{
+  background:var(--white);border-radius:var(--rr) var(--rr) 0 0;
+  padding:16px;max-height:70vh;overflow-y:auto;
+}
+.picker-title{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  font-size:1.1rem;color:var(--navy);text-align:center;
+  padding-bottom:12px;border-bottom:1px solid var(--gray2);margin-bottom:12px;
+}
+.picker-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.picker-boat{
+  padding:12px 8px;border-radius:var(--r);border:2px solid var(--gray2);
+  background:var(--white);cursor:pointer;text-align:center;transition:.15s;
+}
+.picker-boat:active{background:var(--navy);color:var(--white);border-color:var(--navy)}
+.picker-boat.used{opacity:.3;pointer-events:none}
+.picker-boat .p-sail{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.3rem;color:var(--navy)
+}
+.picker-boat.used .p-sail{color:var(--gray3)}
+.picker-boat .p-name{font-size:.65rem;color:var(--gray4);margin-top:2px;line-height:1.2}
+/* ── STANDINGS ── */
+.standings-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.standings-table th{
+  background:var(--navy);color:var(--white);
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:.75rem;letter-spacing:.06em;padding:8px 6px;text-align:center;
+}
+.standings-table th:nth-child(2){text-align:left;padding-left:12px}
+.standings-table td{
+  padding:8px 6px;border-bottom:1px solid var(--gray2);text-align:center;
+}
+.standings-table td:nth-child(2){text-align:left;padding-left:12px}
+.standings-table tr:nth-child(even) td{background:var(--gray1)}
+.pos-1 td{background:#FFF8E1!important;font-weight:600}
+.pos-2 td{background:#F5F5F5!important}
+.pos-3 td{background:#FFF3E0!important}
+.score-cell{font-family:"Barlow Condensed",sans-serif;font-weight:700}
+.score-discard{text-decoration:line-through;color:var(--gray3);font-size:.8rem}
+.score-avg{color:var(--green);font-style:italic}
+.score-dns{color:var(--red)}
+.net-score{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  font-size:1.1rem;color:var(--navy);
+}
+.pos-badge{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1rem;
+  width:32px;height:32px;border-radius:50%;display:inline-flex;
+  align-items:center;justify-content:center;
+}
+.pos-1 .pos-badge{background:var(--gold);color:var(--dark)}
+.pos-2 .pos-badge{background:#B8B8B8;color:var(--dark)}
+.pos-3 .pos-badge{background:#CD7F32;color:var(--white)}
+/* ── ROTATION ── */
+.rot-item{
+  display:flex;align-items:center;gap:10px;
+  padding:10px 0;border-bottom:1px solid var(--gray2);
+}
+.rot-item:last-child{border-bottom:none}
+.rot-num{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:.9rem;
+  color:var(--gray3);min-width:28px;
+}
+.rot-judge{
+  flex:1;font-weight:600;
+}
+.rot-auto{font-size:.75rem;color:var(--gray4)}
+.rot-override{
+  padding:6px 10px;border-radius:var(--r);border:2px solid var(--gray2);
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:.9rem;width:70px;text-align:center;outline:none;
+  background:var(--white);color:var(--navy);-webkit-appearance:none;
+}
+.rot-override:focus{border-color:var(--orange)}
+/* ── ALERTS ── */
+.alert{
+  margin:0 16px 12px;padding:12px 16px;border-radius:var(--r);
+  display:flex;align-items:center;gap:10px;font-size:.85rem;
+}
+.alert-info{background:#E8F0FC;border-left:4px solid var(--blue)}
+.alert-warn{background:#FFF8E1;border-left:4px solid var(--gold)}
+/* ── SECTION TITLE ── */
+.section-title{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--gray4);padding:16px 20px 8px;flex-shrink:0;
+}
+/* ── SCROLLABLE CONTENT ── */
+.scroll-content{flex:1;overflow-y:auto;padding-bottom:12px}
+/* ── JUDGE BADGE ── */
+.judge-badge{
+  background:var(--purple);color:var(--white);
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.7rem;
+  padding:3px 8px;border-radius:20px;margin-left:6px;
+}
+/* ── EMPTY STATE ── */
+.empty-state{
+  text-align:center;padding:48px 24px;color:var(--gray3);
+}
+.empty-state .icon{font-size:3rem;margin-bottom:12px}
+.empty-state p{font-size:.9rem}
+/* ── SUMMARY ROW ── */
+.summary-row{
+  display:flex;gap:8px;overflow-x:auto;padding:12px 16px;flex-shrink:0;
+  scrollbar-width:none;
+}
+.summary-row::-webkit-scrollbar{display:none}
+.summary-card{
+  flex-shrink:0;background:var(--white);border-radius:var(--r);
+  padding:10px 16px;box-shadow:var(--shadow);min-width:90px;text-align:center;
+}
+.summary-card .val{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  font-size:1.6rem;color:var(--navy);line-height:1;
+}
+.summary-card .lbl{font-size:.65rem;color:var(--gray4);text-transform:uppercase;
+  letter-spacing:.06em;margin-top:4px;}
+/* ── CONFIRM DIALOG ── */
+.confirm-overlay{
+  position:fixed;inset:0;background:rgba(13,31,60,.7);
+  z-index:300;display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.confirm-box{
+  background:var(--white);border-radius:var(--rr);padding:24px;
+  width:100%;max-width:320px;box-shadow:var(--shadow-lg);
+}
+.confirm-box h3{font-family:"Barlow Condensed",sans-serif;font-size:1.2rem;font-weight:900;color:var(--navy);margin-bottom:10px}
+.confirm-box p{font-size:.9rem;color:var(--gray4);margin-bottom:20px}
+.confirm-btns{display:flex;gap:10px}
+.confirm-btns .btn{flex:1}
+
+/* ── RACE SUMMARY OVERLAY ── */
+#race-summary{
+  position:fixed;inset:0;background:rgba(13,31,60,.85);
+  z-index:400;display:flex;align-items:center;justify-content:center;
+  padding:24px;backdrop-filter:blur(4px);
+}
+.summary-box{
+  background:var(--white);border-radius:var(--rr);padding:28px 24px;
+  width:100%;max-width:340px;box-shadow:var(--shadow-lg);text-align:center;
+}
+.summary-box .race-num{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:.9rem;
+  color:var(--gray4);letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px;
+}
+.summary-box .leader-name{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:1.8rem;
+  color:var(--navy);line-height:1.1;margin:8px 0 4px;
+}
+.summary-box .leader-sail{
+  font-size:1rem;color:var(--gray4);margin-bottom:12px;
+}
+.summary-box .leader-score{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;font-size:2.5rem;
+  color:var(--gold);line-height:1;
+}
+.summary-box .score-label{
+  font-size:.75rem;color:var(--gray4);text-transform:uppercase;
+  letter-spacing:.06em;margin-top:4px;
+}
+.summary-box .podium{
+  margin-top:16px;border-top:1px solid var(--gray2);padding-top:14px;
+  display:flex;flex-direction:column;gap:6px;text-align:left;
+}
+.podium-row{
+  display:flex;align-items:center;gap:8px;font-size:.9rem;
+}
+.podium-pos{
+  font-family:"Barlow Condensed",sans-serif;font-weight:900;
+  width:28px;height:28px;border-radius:50%;display:flex;
+  align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;
+}
+.podium-pos.p1{background:var(--gold);color:var(--dark)}
+.podium-pos.p2{background:#C0C0C0;color:#333}
+.podium-pos.p3{background:#CD7F32;color:var(--white)}
+.podium-pos.pn{background:var(--gray2);color:var(--gray4)}
+.podium-name{flex:1;font-weight:500}
+.podium-pts{font-family:"Barlow Condensed",sans-serif;font-weight:900;color:var(--navy)}
+/* ── DSQ BUTTON ── */
+.dsq-btn{
+  padding:4px 10px;border-radius:20px;border:1.5px solid var(--red);
+  background:transparent;color:var(--red);cursor:pointer;
+  font-family:"Barlow Condensed",sans-serif;font-weight:700;
+  font-size:.7rem;letter-spacing:.04em;transition:.15s;flex-shrink:0;
+}
+.dsq-btn:active{background:var(--red);color:var(--white)}
+/* ── COPY TOAST ── */
+.copy-success{
+  background:var(--green)!important;
+}
+
+
+/* ── PROTESTE ── */
+.prot-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2)}
+.prot-item:last-child{border:none}
+.prot-icon{font-size:1.2rem;flex-shrink:0;margin-top:2px}
+.prot-info{flex:1}
+.prot-name{font-weight:600;font-size:.9rem}
+.prot-sub{font-size:.75rem;color:var(--gray4);margin-top:2px}
+.prot-status{font-family:"Barlow Condensed",sans-serif;font-weight:700;font-size:.7rem;
+  padding:3px 8px;border-radius:20px;flex-shrink:0;align-self:center}
+.ps-pend{background:var(--orange,#E67E22);color:#fff}
+.ps-dsq{background:var(--red);color:#fff}
+.ps-ok{background:var(--green,#27AE60);color:#fff}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════ APP ══════ -->
+<div id="app">
+
+<!-- ── SETUP ─────────────────────────────────────────────────────────── -->
+<div id="print-area"></div>
+
+<div class="page active" id="page-setup">
+  <div class="page-header">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
+    <div class="page-header-text">
+      <h1 class="brand-club">RC Sails</h1>
+      <p class="brand-sub">Punteggi di regata — vela radiocomandata</p>
+    </div>
+  </div>
+  <div class="scroll-content">
+    <div class="section-title">Evento</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="field">
+          <label>Nome Regata</label>
+          <input type="text" id="cfg-name" placeholder="es. Campionato Invernale 2026">
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Classe</label>
+            <select id="cfg-class">
+              <option value="DF65">DF65</option>
+              <option value="DF95">DF95</option>
+              <option value="IOM">IOM</option>
+              <option value="10R">10 Rater</option>
+              <option value="RG65">RG65</option>
+              <option value="M">Marblehead</option>
+              <option value="ALTRA">Altra classe</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Club Organizzatore</label>
+            <input type="text" id="cfg-club" placeholder="Sigla o nome del circolo">
+          </div>
+        </div>
+        <div class="field">
+          <label>Campo di Regata</label>
+          <input type="text" id="cfg-venue" placeholder="Specchio acqueo o località">
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Data Inizio</label><input type="date" id="cfg-date"></div>
+          <div class="field"><label>Data Fine</label><input type="date" id="cfg-date-end"></div>
+        </div>
+        <div class="field">
+          <label>Comitato di Regata / Segretario</label>
+          <input type="text" id="cfg-officer" placeholder="Nome di chi redige i risultati">
+          <div class="hint">Compare in calce alla classifica esportata.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Formato della Serie</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="field-row">
+          <div class="field">
+            <label>Prove Programmate</label>
+            <input type="number" id="cfg-races" min="1" max="60" value="15">
+          </div>
+          <div class="field">
+            <label>Prove Minime <span class="rule-ref">A1</span></label>
+            <input type="number" id="cfg-minraces" min="1" max="60" value="1">
+          </div>
+        </div>
+        <div class="hint" style="margin-top:-8px;margin-bottom:12px">
+          Sotto il numero di prove minime la serie non è valida e la classifica è indicata come provvisoria.
+        </div>
+        <div class="field">
+          <label>Modalità Flotta</label>
+          <div class="toggle-row">
+            <button class="toggle-btn active" onclick="setFleet('single',this)">Flotta Unica</button>
+            <button class="toggle-btn" onclick="setFleet('multi',this)">Due Flotte (A/B)</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Giudice a Terra <span class="rule-ref">E5.1</span></label>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="judge-off-btn" onclick="setJudgeMode(false,this)">Esterno / Nessuno</button>
+            <button class="toggle-btn" id="judge-on-btn" onclick="setJudgeMode(true,this)">Turno fra i Soci</button>
+          </div>
+          <div class="hint">
+            <b>Esterno / Nessuno</b>: chi dirige non è iscritto, tutte le barche corrono ogni prova.<br>
+            <b>Turno fra i soci</b>: a rotazione un iscritto salta la prova per fare l'osservatore
+            e riceve il punteggio stabilito qui sotto.
+          </div>
+        </div>
+        <div class="field" id="judge-score-wrap" style="display:none">
+          <label>Punteggio di chi fa il turno <span class="rule-ref">A9</span></label>
+          <select id="cfg-judgescore" onchange="readConfig()">
+            <option value="avg-all">Media di tutte le altre prove (A9(a))</option>
+            <option value="avg-before">Media delle prove precedenti (A9(b))</option>
+            <option value="none">Nessun punteggio — prova non conteggiata per lui</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Punteggio</div>
+    <div class="alert alert-info">
+      <span>&#9878;</span>
+      <span>Questi parametri devono corrispondere al <b>Bando di Regata</b> e alle
+      <b>Istruzioni di Regata</b>. Le RRS lasciano queste scelte all'organizzatore.</span>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div class="field">
+          <label>Sistema di Scarti <span class="rule-ref">A2.1</span></label>
+          <select id="cfg-discmode" onchange="readConfig();syncDiscardUI()">
+            <option value="table">Progressivo a tabella</option>
+            <option value="one">Uno scarto</option>
+            <option value="every">Uno scarto ogni N prove</option>
+            <option value="none">Nessuno scarto</option>
+          </select>
+        </div>
+        <div class="field-row" id="disc-params">
+          <div class="field" id="disc-after-wrap">
+            <label>Scarti attivi da</label>
+            <input type="number" id="cfg-discafter" min="1" max="60" value="5">
+          </div>
+          <div class="field" id="disc-every-wrap" style="display:none">
+            <label>Una ogni</label>
+            <input type="number" id="cfg-discevery" min="2" max="20" value="5">
+          </div>
+        </div>
+        <div class="hint" id="disc-preview" style="margin-top:-6px;margin-bottom:14px"></div>
+
+        <div class="field">
+          <label>Punteggio DNS / DNF / DSQ <span class="rule-ref">A5</span></label>
+          <select id="cfg-a53" onchange="readConfig()">
+            <option value="false">Iscritti alla serie + 1 &nbsp;— predefinito RRS (A5.2)</option>
+            <option value="true">Partenti + 1 &nbsp;— se il Bando invoca la A5.3</option>
+          </select>
+          <div class="hint">
+            Con la A5.3 il DNC resta valutato sugli iscritti alla serie, mentre DNS, DNF e DSQ
+            si calcolano sulle barche venute in area di partenza, da indicare in ogni prova.
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Email per Invio Risultati</label>
+          <input type="email" id="cfg-email" placeholder="es. segreteria@club.it" onchange="readConfig()">
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">Partecipanti <span id="boat-count-badge" style="background:var(--navy);color:var(--white);padding:2px 8px;border-radius:20px;font-size:.7rem">0</span></div>
+    <div class="alert alert-info">
+      <span>ℹ️</span><span>Inserisci i partecipanti prima di iniziare le prove. Il numero velico deve essere univoco.</span>
+    </div>
+    <div class="card">
+      <div class="card-body">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1" class="field" style="margin:0">
+            <input type="text" id="new-sail" placeholder="N° Velico" style="text-align:center;font-family:'Barlow Condensed';font-weight:900;font-size:1.2rem" maxlength="6">
+          </div>
+          <div style="flex:2" class="field" style="margin:0">
+            <input type="text" id="new-name" placeholder="Nome Skipper">
+          </div>
+          <div id="fleet-select-wrap" style="display:none;flex:1" class="field" style="margin:0">
+            <select id="new-fleet">
+              <option value="A">FL. A</option>
+              <option value="B">FL. B</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn btn-primary btn-block" onclick="addBoat()">＋ Aggiungi Barca</button>
+      </div>
+    </div>
+    <div class="card" id="boat-list-card" style="display:none">
+      <div class="card-body" id="boat-list"></div>
+    </div>
+    <div style="padding:0 16px 16px">
+      <button class="btn btn-gold btn-block" onclick="goToRacing()" style="padding:16px">
+        &#127937; Inizia Regata &rarr;
+      </button>
+    </div>
+
+    <div class="section-title">Utilità</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="sub-head">Importa regata da Excel</div>
+        <div onclick="document.getElementById('import-xl-inp').click()"
+          style="border:2px dashed var(--gray3);border-radius:var(--r);padding:18px;
+          text-align:center;cursor:pointer;background:var(--gray1)">
+          <div style="font-size:1.6rem;margin-bottom:6px">&#128193;</div>
+          <div style="font-size:.85rem;color:var(--gray4)"><strong>Carica un file .xlsx esportato dall'app</strong><br>
+            Importa arrivi e partecipanti da un file esportato</div>
+          <input type="file" id="import-xl-inp" accept=".xlsx" style="display:none" onchange="importFromXlsx(this)">
+        </div>
+        <div id="import-xl-preview" style="margin-top:8px"></div>
+        <div class="sub-head">Documenti</div>
+        <button class="btn btn-outline btn-block" onclick="stampaDoc('idr')">
+          &#9878; Estratto Istruzioni di Regata
+        </button>
+        <div class="hint">
+          Genera una pagina che descrive il sistema di punteggio impostato, con i
+          riferimenti di regola. Da affiggere insieme alla classifica.
+        </div>
+
+        <div class="sub-head">Azzeramento</div>
+        <button onclick="newRegata()" style="width:100%;padding:13px;border:2px solid var(--red);
+          border-radius:var(--r);background:transparent;color:var(--red);
+          font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:1rem;
+          cursor:pointer;letter-spacing:.06em;text-transform:uppercase">
+          &#128465; Nuova Regata — Azzera Dati</button>
+        <div class="hint" style="text-align:center">
+          Cancella arrivi, barche, penalità e proteste. Mantiene la configurazione.</div>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
+<!-- ── ARRIVI ─────────────────────────────────────────────────────────── -->
+<div class="page" id="page-race">
+  <div class="page-header">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'" style="width:36px;height:36px">
+    <div class="page-header-text">
+      <h1 id="race-header-title">Ordine di Arrivo</h1>
+      <p id="race-header-sub">Seleziona la prova</p>
+    </div>
+    <div class="header-badge" id="race-status-badge">—</div>
+  </div>
+  <div class="race-tabs" id="race-tabs"></div>
+  <div class="scroll-content" id="race-content">
+    <div class="empty-state"><div class="icon">⚓</div><p>Configura la regata prima</p></div>
+  </div>
+</div>
+
+<!-- ── CLASSIFICA ─────────────────────────────────────────────────────── -->
+<div class="page" id="page-standings">
+  <div class="page-header">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'" style="width:36px;height:36px">
+    <div class="page-header-text">
+      <h1>Classifica</h1>
+      <p id="standings-sub">Aggiornata in tempo reale</p>
+    </div>
+    <div class="header-badge" id="fleet-tab-badge" onclick="toggleFleetView()" style="cursor:pointer">FL.A</div>
+  </div>
+  <div class="summary-row" id="standings-summary"></div>
+  <div class="scroll-content">
+    <div style="overflow-x:auto;padding:0 16px 16px">
+      <table class="standings-table" id="standings-table">
+        <thead><tr id="standings-thead"></tr></thead>
+        <tbody id="standings-tbody"></tbody>
+      </table>
+    </div>
+    <div class="alert alert-info" style="font-size:.75rem">
+      <span>🟢</span><span>Verde = AVG (RRS A9) &nbsp;·&nbsp; <strike>barrato</strike> = scarto &nbsp;·&nbsp; 🔴 = DNS/DNF = N+1 automatico</span>
+    </div>
+    <div id="protest-table-section" style="display:none;padding:0 16px 4px"></div>
+
+    <div style="padding:0 16px 8px">
+      <button class="btn btn-block" style="background:var(--navy);color:#fff;padding:15px"
+        onclick="stampaDoc('classifica')">
+        &#128424; Classifica Ufficiale — Stampa / PDF
+      </button>
+      <div class="hint" style="text-align:center;margin-top:5px">
+        Documento per l'albo dei risultati, con codici RRS, scarti, proteste e firma.
+      </div>
+    </div>
+
+    <div style="padding:0 16px 4px;display:flex;gap:8px">
+      <button class="btn btn-primary" style="flex:1;font-size:.82rem" onclick="exportExcel()">
+        📊 Esporta Excel
+      </button>
+      <button class="btn btn-gold" style="flex:1;font-size:.82rem" onclick="exportAndEmail()">
+        📧 Invia Risultati
+      </button>
+    </div>
+    <div style="padding:0 16px 4px;display:flex;gap:8px">
+      <button class="btn btn-outline" style="flex:1;font-size:.82rem" onclick="copyStandings()">
+        📋 Copia Classifica
+      </button>
+      <button class="btn btn-outline" style="flex:1;font-size:.82rem;border-color:var(--teal,#117A65);color:var(--teal,#117A65)" onclick="sendToCampionato()">
+        📤 Invia a Campionato
+      </button>
+    </div>
+    <div style="padding:0 16px 4px">
+      <button class="btn btn-outline btn-block" style="font-size:.82rem;border-color:var(--orange,#E67E22);color:var(--orange,#E67E22)" onclick="openProtests()">
+        ⚖️ Gestisci Proteste
+      </button>
+    </div>
+    <div style="padding:0 16px 12px">
+      <div style="font-size:.72rem;color:var(--gray4);text-align:center;margin-top:4px">
+        📤 Invia a Campionato: copia dati negli appunti → incolla in GRCS_CAMPIONATO
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── ROTAZIONE ─────────────────────────────────────────────────────── -->
+<div class="page" id="page-rotation">
+  <div class="page-header">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'" style="width:36px;height:36px">
+    <div class="page-header-text">
+      <h1>Turni di Giuria</h1>
+      <p>Round-robin automatico · Override manuale</p>
+    </div>
+  </div>
+  <div class="scroll-content" style="padding:12px 0">
+    <div class="card">
+      <div class="card-header">&#128203; Piano dei Turni</div>
+      <div class="card-body" id="rotation-list" style="padding:8px 16px"></div>
+    </div>
+    <div class="card">
+      <div class="card-header">⚖️ Equità Giudizi</div>
+      <div class="card-body" id="fairness-list" style="padding:8px 16px"></div>
+    </div>
+    <div class="alert alert-warn" style="font-size:.75rem">
+      <span>⚠️</span><span>Modificare il campo Override solo se necessario. L'automatico garantisce la massima equità (diff ≤ 1).</span>
+    </div>
+  </div>
+</div>
+
+</div>
+
+<!-- ── BOTTOM NAV ──────────────────────────────────────────────────── -->
+<nav id="nav">
+  <button class="nav-btn active" onclick="navigate('setup')" id="nav-setup">
+    <span class="icon">⚙️</span>Setup
+  </button>
+  <button class="nav-btn" onclick="navigate('race')" id="nav-race">
+    <span class="icon">🏁</span>Arrivi
+  </button>
+  <button class="nav-btn" onclick="navigate('standings')" id="nav-standings">
+    <span class="icon">🏆</span>Classifica
+  </button>
+  <button class="nav-btn" onclick="navigate('rotation')" id="nav-rotation" style="display:none">
+    <span class="icon">🔄</span>Giudici
+  </button>
+</nav>
+
+<!-- ── PROTESTE ── -->
+<div class="picker-overlay" id="protest-modal" style="display:none" onclick="closeProtests()">
+  <div class="picker-sheet" style="max-height:85vh;overflow-y:auto" onclick="event.stopPropagation()">
+    <div class="picker-title">⚖️ Gestione Proteste</div>
+
+    <!-- Form nuova protesta -->
+    <div style="background:var(--gray1,#F4F6FA);border-radius:var(--r);padding:14px;margin-bottom:14px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;
+        color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">
+        Nuova Protesta
+      </div>
+
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Prova</label>
+        <select id="p-race-sel" style="width:100%;padding:9px;border:2px solid var(--gray2);border-radius:var(--r);font-size:.92rem;outline:none;-webkit-appearance:none;background:#fff"></select>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--navy);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">🔵 Protestante (chi fa la protesta)</label>
+        <select id="p-sail-from" style="width:100%;padding:11px 13px;border:2px solid var(--navy);border-radius:var(--r);font-size:.95rem;outline:none;-webkit-appearance:none;background:#fff;color:#111"></select>
+      </div>
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--red);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">🔴 Protestato (chi viene protestato)</label>
+        <select id="p-sail-to" style="width:100%;padding:11px 13px;border:2px solid var(--red);border-radius:var(--r);font-size:.95rem;outline:none;-webkit-appearance:none;background:#fff;color:#111"></select>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Regola RRS</label>
+        <select id="p-rule-sel" style="width:100%;padding:9px;border:2px solid var(--gray2);border-radius:var(--r);font-size:.92rem;outline:none;-webkit-appearance:none;background:#fff">
+<option value="">— Seleziona regola RRS —</option>
+<option value="RRS 10">RRS 10 — Dritta/Sinistra</option>
+<option value="RRS 11">RRS 11 — Sopravento/Sottovento</option>
+<option value="RRS 12">RRS 12 — Stessa amura, in rotta</option>
+<option value="RRS 13">RRS 13 — Durante virata</option>
+<option value="RRS 14">RRS 14 — Evitare il contatto</option>
+<option value="RRS 15">RRS 15 — Acquistando diritto di precedenza</option>
+<option value="RRS 16">RRS 16 — Cambiando rotta</option>
+<option value="RRS 17">RRS 17 — Stesso bordo, barche sovrapposte</option>
+<option value="RRS 18">RRS 18 — Spazio alla boa</option>
+<option value="RRS 19">RRS 19 — Spazio all'ostacolo</option>
+<option value="RRS 20">RRS 20 — Richiesta di spazio per virare</option>
+<option value="RRS 21">RRS 21 — Barche che fanno penitenza</option>
+<option value="RRS 22">RRS 22 — Barche che si rivoltano / arenate</option>
+<option value="RRS 28">RRS 28 — Percorso</option>
+<option value="RRS 31">RRS 31 — Toccare una marca</option>
+<option value="RRS 42">RRS 42 — Propulsione</option>
+<option value="RRS 60">RRS 60 — Diritto di protestare</option>
+<option value="ALTRO">Altra regola / infrazione</option>
+        </select>
+      </div>
+
+      <div style="margin-bottom:8px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Esito (dopo decisione giurì)</label>
+        <select id="p-outcome-sel" style="width:100%;padding:9px;border:2px solid var(--gray2);border-radius:var(--r);font-size:.92rem;outline:none;-webkit-appearance:none;background:#fff">
+          <option value="pending">⏳ In attesa di decisione</option>
+          <option value="dsq">🔴 Accolto — protestato DSQ</option>
+          <option value="dismissed">✅ Respinta — risultato confermato</option>
+
+        </select>
+      </div>
+
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:.7rem;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px">Commenti / Descrizione incidente</label>
+        <textarea id="p-notes-inp" placeholder="Descrivi brevemente l'incidente: posizione, rotta, contatto…"
+          rows="3" style="width:100%;padding:9px;border:2px solid var(--gray2);border-radius:var(--r);
+          font-size:.88rem;outline:none;font-family:'Barlow',sans-serif;resize:none;
+          -webkit-appearance:none;line-height:1.5"></textarea>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%" onclick="addProtest()">+ Registra Protesta</button>
+    </div>
+
+    <!-- Lista proteste esistenti -->
+    <div id="protest-list-modal"></div>
+
+    <button class="btn btn-outline" style="width:100%;margin-top:12px" onclick="closeProtests()">Chiudi</button>
+  </div>
+</div>
+
+<!-- ── RACE SUMMARY ── -->
+<div id="race-summary" style="display:none;position:fixed;inset:0;
+  background:rgba(13,31,60,.85);z-index:400;
+  display:none;align-items:center;justify-content:center;padding:24px;
+  backdrop-filter:blur(4px)" onclick="closeSummary()">
+  <div onclick="event.stopPropagation()" style="
+    background:#fff;border-radius:16px;padding:28px 24px;
+    width:100%;max-width:340px;box-shadow:0 8px 32px rgba(13,31,60,.3);
+    text-align:center;margin:auto;position:relative">
+    <div id="sum-race-label" style="font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:.9rem;color:#6B7A99;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:4px">Prova 1 completata</div>
+    <div style="font-size:2rem;margin:8px 0">🏁</div>
+    <div id="sum-leader-name" style="font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:1.8rem;color:#1B3A6B;line-height:1.1;margin:8px 0 4px">—</div>
+    <div id="sum-leader-sail" style="font-size:1rem;color:#6B7A99;margin-bottom:12px"></div>
+    <div id="sum-leader-pts" style="font-family:'Barlow Condensed',sans-serif;
+  font-weight:900;font-size:2.5rem;color:#D4A017;line-height:1">—</div>
+    <div style="font-size:.75rem;color:#6B7A99;text-transform:uppercase;
+  letter-spacing:.06em;margin-top:4px">punti netti in classifica</div>
+    <div id="sum-podium" style="margin-top:16px;border-top:1px solid #E8ECF4;
+  padding-top:14px;display:flex;flex-direction:column;gap:6px;text-align:left"></div>
+    <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="closeSummary()">
+      Continua →
+    </button>
+  </div>
+</div>
+
+<!-- ── BOAT PICKER ── -->
+<div class="picker-overlay" id="picker" style="display:none" onclick="closePicker()">
+  <div class="picker-sheet" onclick="event.stopPropagation()">
+    <div class="picker-title" id="picker-title">Seleziona Barca</div>
+    <div class="picker-grid" id="picker-grid"></div>
+    <button class="btn btn-outline btn-block" style="margin-top:12px" onclick="closePicker()">Annulla</button>
+  </div>
+</div>
+
+<!-- ── CONFIRM ── -->
+<div class="confirm-overlay" id="confirm-overlay" style="display:none">
+  <div class="confirm-box">
+    <h3 id="confirm-title">Conferma</h3>
+    <p id="confirm-msg"></p>
+    <div class="confirm-btns">
+      <button class="btn btn-outline" onclick="closeConfirm()">Annulla</button>
+      <button class="btn btn-red" id="confirm-ok">Elimina</button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/xlsx.mini.min.js" defer></script>
+<script>
+
+
+
+
+
+
+
+
+
+
+
+
+// ═══════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════
+const LOGO = "assets/logo.png";
+
+
+const DISCARD_TABLE = [
+  [1,0],[2,0],[3,0],[4,0],[5,1],[6,1],[7,1],[8,1],
+  [9,2],[10,2],[11,2],[12,3],[13,3],[14,3],[15,4],
+  [16,4],[17,5],[18,5],[19,6],[20,6]
+];
+
+let state = {
+  config: {
+    name:"", classe:"DF65", club:"", venue:"", officer:"",
+    date:"", dateEnd:"", races:15, minRaces:1,
+    fleet:"single", useJudge:false, resultEmail:"",
+    scoring:{ discardMode:"table", discardAfter:5, discardEvery:5,
+              a53:false, judgeScore:"avg-all" }
+  },
+  boats: [],
+  races: [],
+  overrides: {},
+  useJudge: false,
+  currentFleetView: "A",
+  protests: []
+};
+
+// Inizializza date
+document.getElementById("cfg-date").value = new Date().toISOString().slice(0,10);
+
+// ── Carica stato da localStorage (sicurezza per refresh accidentale)
+function DEFAULT_STATE() {
+  return {
+    config:{
+      name:"", classe:"DF65", club:"", venue:"", officer:"",
+      date:"", dateEnd:"", races:15, minRaces:1,
+      fleet:"single", useJudge:false, resultEmail:"",
+      scoring:{
+        discardMode:"table",   // table | one | every | none
+        discardAfter:5,        // prove necessarie perché gli scarti si attivino
+        discardEvery:5,        // usato solo da discardMode = every
+        a53:false,             // true = punteggio sui partenti (RRS A5.3)
+        judgeScore:"avg-all"   // avg-all (A9a) | avg-before (A9b) | none
+      }
+    },
+    boats:[], races:[], overrides:{}, useJudge:false,
+    currentFleetView:"A", protests:[], schema:SCHEMA_VERSION
+  };
+}
+
+// Normalizza qualunque stato salvato sullo schema corrente senza perdere dati.
+function normalizeState(s) {
+  const d = DEFAULT_STATE();
+  const out = Object.assign({}, d, s||{});
+  out.config          = Object.assign({}, d.config, (s&&s.config)||{});
+  out.config.scoring  = Object.assign({}, d.config.scoring, (s&&s.config&&s.config.scoring)||{});
+  out.boats       = Array.isArray(out.boats) ? out.boats : [];
+  out.races       = Array.isArray(out.races) ? out.races : [];
+  out.protests    = Array.isArray(out.protests) ? out.protests : [];
+  out.overrides   = (out.overrides && typeof out.overrides==="object") ? out.overrides : {};
+  out.races = out.races.map(r=>Object.assign(
+    {judge_a:null, judge_b:null, finishes_a:[], finishes_b:[],
+     penalties:{}, confirmed:false, cancelled:false, starters:null}, r||{}));
+  out.races.forEach(r=>{
+    if(!r.penalties) r.penalties={};
+    // migrazione: la vecchia lista race.dne diventa una penalità DNE tracciata
+    if(Array.isArray(r.dne)) {
+      r.dne.forEach(s=>{ if(!r.penalties[s]) r.penalties[s]={code:"DNE", pts:0, note:"migrata da v14"}; });
+      delete r.dne;
+    }
+    // ZFP rimossa: non applicabile in vela RC (App. E cancella la RRS 30.2)
+    if(r.zfp) delete r.zfp;
+  });
+  return out;
+}
+
+// Legge la schermata di configurazione dentro lo stato
+function readConfig() {
+  const v = id => { const el=document.getElementById(id); return el ? el.value : ""; };
+  const c = state.config;
+  c.name     = v("cfg-name")   || "Regata";
+  c.classe   = v("cfg-class")  || "DF65";
+  c.club     = v("cfg-club")   || "";
+  c.venue    = v("cfg-venue")  || "";
+  c.officer  = v("cfg-officer")|| "";
+  c.date     = v("cfg-date");
+  c.dateEnd  = v("cfg-date-end");
+  c.races    = Math.max(1, parseInt(v("cfg-races"))    || 15);
+  c.minRaces = Math.max(1, parseInt(v("cfg-minraces")) || 1);
+  c.resultEmail = v("cfg-email");
+  c.scoring = Object.assign({}, c.scoring, {
+    discardMode : v("cfg-discmode")  || "table",
+    discardAfter: Math.max(1, parseInt(v("cfg-discafter")) || 5),
+    discardEvery: Math.max(2, parseInt(v("cfg-discevery")) || 5),
+    a53         : v("cfg-a53")==="true",
+    judgeScore  : v("cfg-judgescore") || "avg-all"
+  });
+  applyBranding();
+  const prev = document.getElementById("disc-preview");
+  if(prev) prev.textContent = discardPreview();
+  saveState();
+}
+
+// Mostra solo i parametri pertinenti al sistema di scarti scelto
+function syncDiscardUI() {
+  const m = (document.getElementById("cfg-discmode")||{}).value || "table";
+  const show = (id,on) => { const e=document.getElementById(id); if(e) e.style.display = on?"block":"none"; };
+  show("disc-after-wrap", m!=="none");
+  show("disc-every-wrap", m==="every");
+  const prev = document.getElementById("disc-preview");
+  if(prev) prev.textContent = m==="none" ? "Nessun punteggio viene escluso dalla serie." : discardPreview();
+}
+
+// Intestazioni dinamiche: club e classe al posto delle costanti
+function applyBranding() {
+  const c = state.config || {};
+  document.querySelectorAll(".brand-club").forEach(e=>{ e.textContent = c.club || "RC Sails"; });
+  document.querySelectorAll(".brand-sub").forEach(e=>{
+    e.textContent = (c.classe && c.classe!=="ALTRA" ? c.classe + " · " : "") + (c.name || "Scoring Model");
+  });
+}
+
+function loadState() {
+  try {
+    const s = localStorage.getItem("grcs_scoring");
+    if(!s) return;
+    const parsed = JSON.parse(s);
+    const legacy = !parsed.schema || parsed.schema < SCHEMA_VERSION;
+    state = normalizeState(parsed);
+    // Le prove già registrate in v14 erano implicitamente concluse
+    if(legacy) state.races.forEach(r=>{
+      if((r.finishes_a||[]).length || (r.finishes_b||[]).length) r.confirmed = true;
+    });
+    state.schema = SCHEMA_VERSION;
+    syncUI();
+  } catch(e) {
+    console.warn("Stato salvato non leggibile — si riparte dallo stato iniziale.", e);
+  }
+}
+
+function saveState() {
+  try {
+    state.schema = SCHEMA_VERSION;
+    localStorage.setItem("grcs_scoring", JSON.stringify(state));
+  } catch(e) { console.warn("Salvataggio non riuscito", e); }
+}
+
+// Escaping HTML — i nomi sono testo libero e finiscono in innerHTML (D10)
+function esc(s) {
+  return String(s==null ? "" : s).replace(/[&<>"']/g,
+    c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+
+// ══════════════════════════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════════════════════════
+function navigate(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn").forEach(b => b.classList.remove("active"));
+  document.getElementById("page-"+page).classList.add("active");
+  document.getElementById("nav-"+page).classList.add("active");
+  if(page==="race") renderRacePage();
+  if(page==="standings") renderStandings();
+  if(page==="rotation") renderRotation();
+}
+
+// ══════════════════════════════════════════════════════════════
+// SETUP
+// ══════════════════════════════════════════════════════════════
+let fleetMode = "single";
+
+function setJudgeMode(on, btn) {
+  state.useJudge = on;
+  state.config.useJudge = on;
+  document.querySelectorAll("#judge-off-btn,#judge-on-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  // Mostra/nasconde tab rotazione
+  document.getElementById("nav-rotation").style.display = on ? "flex" : "none";
+  const jsw = document.getElementById("judge-score-wrap");
+  if(jsw) jsw.style.display = on ? "block" : "none";
+  saveState();
+}
+
+function setFleet(mode, btn) {
+  fleetMode = mode;
+  state.config.fleet = mode;
+  // Le barche create in flotta singola non hanno flotta: assegnale alla A
+  if(mode==="multi") state.boats.forEach(b=>{ if(!b.fleet) b.fleet="A"; });
+  document.querySelectorAll(".toggle-btn").forEach(b=>b.classList.remove("active"));
+  btn.classList.add("active");
+  document.getElementById("fleet-select-wrap").style.display = mode==="multi"?"block":"none";
+  renderBoatList();
+  saveState();
+}
+
+function addBoat() {
+  const sail = document.getElementById("new-sail").value.trim();
+  const name = document.getElementById("new-name").value.trim();
+  const fleet = fleetMode==="multi" ? document.getElementById("new-fleet").value : null;
+  if(!sail || !name) { alert("Inserisci N° Velico e Nome"); return; }
+  if(state.boats.find(b=>b.sail===sail)) { alert("N° Velico già presente"); return; }
+  state.boats.push({ id: Date.now()+"", sail, name, club: state.config.club||"", fleet });
+  document.getElementById("new-sail").value="";
+  document.getElementById("new-name").value="";
+  renderBoatList();
+  saveState();
+}
+
+function removeBoat(id) {
+  showConfirm("Elimina Barca","Sei sicuro? I risultati correlati potrebbero essere alterati.", ()=>{
+    state.boats = state.boats.filter(b=>b.id!==id);
+    renderBoatList();
+    saveState();
+  });
+}
+
+function renderBoatList() {
+  const list = document.getElementById("boat-list");
+  const card = document.getElementById("boat-list-card");
+  const count = document.getElementById("boat-count-badge");
+  count.textContent = state.boats.length;
+  if(!state.boats.length) { card.style.display="none"; return; }
+  card.style.display="block";
+  const isMulti = (state.config.fleet||fleetMode)==="multi";
+  list.innerHTML = state.boats.map(b=>`
+    <div class="boat-item">
+      <div class="sail-badge ${b.fleet==="B"?"fleet-b":""}">${b.sail}</div>
+      <div class="boat-info">
+        <div class="boat-name">${esc(b.name)}</div>
+        <div class="boat-sub">${esc(b.club)}${isMulti?" · <b>Flotta "+b.fleet+"</b>":""}</div>
+      </div>
+      ${isMulti?`<span class="fleet-pill ${b.fleet}">${b.fleet}</span>`:""}
+      <button class="delete-btn" onclick="removeBoat('${b.id}')">✕</button>
+    </div>`).join("");
+}
+
+function goToRacing() {
+  readConfig();
+  state.config.fleet = fleetMode;
+  state.config.useJudge = state.useJudge;
+  if(state.boats.length<2) { alert("Aggiungi almeno 2 barche"); return; }
+  // Inizializza races vuote
+  while(state.races.length < state.config.races) {
+    state.races.push({judge_a:null,judge_b:null,finishes_a:[],finishes_b:[],
+      penalties:{},confirmed:false,cancelled:false,starters:null});
+  }
+  saveState();
+  navigate("race");
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROTAZIONE GIUDICI (round-robin)
+// ══════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// MOTORE DI PUNTEGGIO — RRS 2025-2028, Appendice A + Appendice E
+// v15 — rev. 05/09/2026
+//
+// Principio di fondo: l'ordine d'arrivo registrato (finishes_a/_b) è un
+// dato GREZZO e non viene MAI alterato da una penalità. Le penalità sono
+// un livello sovrapposto (race.penalties) sempre reversibile.
+// ══════════════════════════════════════════════════════════════════════
+
+const SCHEMA_VERSION = 15;
+const round1 = v => Math.round(v * 10) / 10;   // RRS A9: decimo, 0,05 per eccesso
+
+// ── Codici di punteggio — RRS A10 ─────────────────────────────────────
+//    dnf     : punteggio = numero iscritti + 1 (RRS A5.2)
+//    moveUp  : le barche dietro risalgono di un posto (RRS A6.1)
+//    exclud  : il punteggio è scartabile (RRS 90.3(b))
+const CODES = {
+  DNC: {dnf:true,  moveUp:true,  exclud:true,  desc:"Non venuta in area di partenza"},
+  DNS: {dnf:true,  moveUp:true,  exclud:true,  desc:"Non partita"},
+  OCS: {dnf:true,  moveUp:true,  exclud:true,  desc:"Sul lato percorso alla partenza (RRS 30.1)"},
+  UFD: {dnf:true,  moveUp:true,  exclud:true,  desc:"Squalifica bandiera U (RRS 30.3)"},
+  BFD: {dnf:true,  moveUp:true,  exclud:true,  desc:"Squalifica bandiera nera (RRS 30.4)"},
+  NSC: {dnf:true,  moveUp:true,  exclud:true,  desc:"Non ha percorso il percorso"},
+  DNF: {dnf:true,  moveUp:true,  exclud:true,  desc:"Non ha terminato"},
+  RET: {dnf:true,  moveUp:true,  exclud:true,  desc:"Ritirata dopo l'arrivo"},
+  DSQ: {dnf:true,  moveUp:true,  exclud:true,  desc:"Squalificata"},
+  DNE: {dnf:true,  moveUp:true,  exclud:false, desc:"Squalifica non scartabile (RRS 90.3(b))"},
+  DGM: {dnf:true,  moveUp:true,  exclud:false, desc:"Squalifica per grave cattiva condotta"},
+  DPI: {dnf:false, moveUp:false, exclud:true,  desc:"Penalità discrezionale a punti (RRS E7)"},
+  RDG: {dnf:false, moveUp:false, exclud:true,  desc:"Riparazione concessa (RRS A6.2)"}
+};
+// NOTA — ZFP e SCP non sono previste in vela radiocomandata:
+// l'Appendice E cancella la regola 30.2 (E3.8(a)) e la regola 44.3 (E4.1).
+// In vela RC la penalità in acqua è la Penalità di Un Giro (E4.3), che non
+// incide sul punteggio; le penalità a punti passano dalla regola E7 (DPI).
+
+function fleetOf(boat) { return (boat && boat.fleet) || "A"; }
+
+function getBoatsByFleet(fleet) {
+  if(state.config.fleet!=="multi") return state.boats;
+  return state.boats.filter(b=>fleetOf(b)===fleet);
+}
+
+function getPenalty(raceIdx, sail) {
+  const race = state.races[raceIdx];
+  const p = race && race.penalties && race.penalties[sail];
+  return (p && CODES[p.code]) ? p : null;
+}
+
+function setPenalty(raceIdx, sail, code, pts, note) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  if(!race.penalties) race.penalties = {};
+  if(!code) delete race.penalties[sail];
+  else race.penalties[sail] = {
+    code: code, pts: Number(pts)||0, note: note||"",
+    ts: new Date().toISOString()
+  };
+  saveState();
+  renderStandings();
+  if(document.getElementById("page-race").classList.contains("active")) renderCurrentRace();
+}
+
+function clearPenalty(raceIdx, sail) { setPenalty(raceIdx, sail, null); }
+
+// ── Rotazione giudici ─────────────────────────────────────────────────
+function getAutoJudge(raceIdx, fleet) {
+  const boats = getBoatsByFleet(fleet);
+  if(!boats.length) return null;
+  return boats[raceIdx % boats.length].sail;
+}
+
+// Il giudice viene CONGELATO nella prova alla prima registrazione, così
+// aggiungere o togliere barche non altera le prove già disputate.
+function freezeJudge(raceIdx) {
+  const race = state.races[raceIdx];
+  if(!race || !state.useJudge) return;
+  if(!race.judge_a) race.judge_a = getAutoJudge(raceIdx, "A");
+  if(state.config.fleet==="multi" && !race.judge_b) race.judge_b = getAutoJudge(raceIdx, "B");
+}
+
+function getEffectiveJudge(raceIdx, fleet) {
+  if(!state.useJudge) return null;
+  const ov = state.overrides && state.overrides[raceIdx+"_"+fleet];
+  if(ov) return ov;
+  const race = state.races[raceIdx];
+  const frozen = race && race["judge_"+String(fleet).toLowerCase()];
+  return frozen || getAutoJudge(raceIdx, fleet);
+}
+
+// ── Scarti ────────────────────────────────────────────────────────────
+function scoringCfg() {
+  return (state.config && state.config.scoring) || {
+    discardMode:"table", discardAfter:5, discardEvery:5, a53:false, judgeScore:"avg-all"
+  };
+}
+
+// Il sistema di scarti è una scelta del Bando: la RRS A2.1 prevede per difetto
+// l'esclusione del solo peggior punteggio, ma consente ogni altra disposizione.
+function getDiscards(n_races) {
+  const sc = scoringCfg();
+  if(sc.discardMode==="none") return 0;
+  if(n_races < (sc.discardAfter||1)) return 0;
+  switch(sc.discardMode) {
+    case "one":   return 1;
+    case "every": return Math.floor(n_races / Math.max(2, sc.discardEvery||5));
+    case "table":
+    default: {
+      const row = DISCARD_TABLE.find(r=>r[0]===n_races);
+      if(row) return row[1];
+      if(n_races>20) return 6 + Math.ceil((n_races-20)/2);
+      return 0;
+    }
+  }
+}
+
+// Riepilogo leggibile del sistema di scarti, per la schermata di configurazione
+function discardPreview() {
+  const sc = scoringCfg(), n = state.config.races||15, out = [];
+  let prev = -1;
+  for(let i=1;i<=n;i++) {
+    const d = getDiscards(i);
+    if(d!==prev) { out.push(`${i}${i===n?"":"+"} prove → ${d} scart${d===1?"o":"i"}`); prev=d; }
+  }
+  return out.slice(0,6).join(" · ");
+}
+
+// RRS A2.1 — si escludono i peggiori; a parità si esclude la prova
+// disputata per prima. I punteggi non scartabili (DNE, DGM) restano.
+function findDiscardIndices(scores, noDiscard) {
+  const played = scores
+    .map((s,i)=> s!==null ? {v:s, i:i, fixed: noDiscard ? !!noDiscard[i] : false} : null)
+    .filter(Boolean);
+  const n = getDiscards(played.length);
+  if(!n) return new Set();
+  const sortable = played.filter(x=>!x.fixed).sort((a,b)=> b.v-a.v || a.i-b.i);
+  return new Set(sortable.slice(0,n).map(x=>x.i));
+}
+
+// ── Ordine d'arrivo effettivo ─────────────────────────────────────────
+// RRS A6.1: squalificate, ritirate e NSC escono dall'ordine e le barche
+// con piazzamento peggiore risalgono di un posto.
+function rankedOrder(raceIdx, fleet) {
+  const race = state.races[raceIdx];
+  if(!race) return [];
+  const isMulti = state.config.fleet==="multi";
+  const raw = isMulti ? (fleet==="B" ? race.finishes_b : race.finishes_a) : race.finishes_a;
+  return (raw||[]).filter(s=>{
+    const p = getPenalty(raceIdx, s);
+    return !(p && CODES[p.code].moveUp);
+  });
+}
+
+function rawFinishes(raceIdx, fleet) {
+  const race = state.races[raceIdx];
+  if(!race) return [];
+  const isMulti = state.config.fleet==="multi";
+  return (isMulti ? (fleet==="B" ? race.finishes_b : race.finishes_a) : race.finishes_a) || [];
+}
+
+// Prove valide per una flotta: disputate, confermate e non annullate
+function countPlayed(fleet) {
+  return state.races.filter((r,i)=>{
+    if(!r || r.cancelled) return false;
+    return rawFinishes(i, fleet).length>0;
+  }).length;
+}
+
+// ── Calcolo del punteggio di serie ────────────────────────────────────
+function calcScore(boat, fleet) {
+  const sc       = scoringCfg();
+  const isMulti  = state.config.fleet==="multi";
+  const fl       = isMulti ? (fleet || fleetOf(boat)) : "A";
+  const entered  = isMulti ? getBoatsByFleet(fl).length : state.boats.length;
+  const dns      = entered + 1;              // RRS A5.2 — iscritti alla serie + 1
+
+  // RRS A5.3 (solo se invocata dal Bando): DNS/DNF/DSQ sui partenti,
+  // DNC sempre sugli iscritti alla serie.
+  function dnsPoints(race, code) {
+    if(!sc.a53 || code==="DNC") return dns;
+    const st = (race && race.starters>0) ? race.starters : entered;
+    return st + 1;
+  }
+
+  const scores = [], codes = [], noDiscard = [];
+
+  for(let r=0; r<state.config.races; r++) {
+    const race = state.races[r];
+    if(!race || race.cancelled) { scores.push(null); codes.push(null); noDiscard.push(false); continue; }
+
+    const judge   = getEffectiveJudge(r, fl);
+    const started = rawFinishes(r, fl).length>0;
+    const pen     = getPenalty(r, boat.sail);
+
+    // Barca di turno — trattamento secondo il Bando (RRS A9).
+    // La DPI non la esclude: un osservatore può infrangere una regola
+    // (es. RRS E2.2) e il comitato può aggiungere punti (RRS E7).
+    if(state.useJudge && boat.sail===judge && (!pen || pen.code==="DPI")) {
+      if(sc.judgeScore==="none") { scores.push(null); codes.push(null); noDiscard.push(false); }
+      else { scores.push("AVG"); codes.push("AVG"); noDiscard.push(false); }
+      continue;
+    }
+
+    if(pen) {
+      const c = CODES[pen.code];
+      if(c.dnf) { scores.push(dnsPoints(race, pen.code)); codes.push(pen.code); noDiscard.push(!c.exclud); continue; }
+      if(pen.code==="RDG") { scores.push(round1(pen.pts)); codes.push("RDG"); noDiscard.push(false); continue; }
+    }
+
+    const pos = rankedOrder(r, fl).indexOf(boat.sail);
+    if(pos===-1) {
+      // Prova non ancora confermata → nessun punteggio (evita falsi DNF in diretta)
+      if(!started || !race.confirmed) { scores.push(null); codes.push(null); noDiscard.push(false); }
+      else { scores.push(dnsPoints(race,"DNF")); codes.push("DNF"); noDiscard.push(false); }
+    } else {
+      // RRS E7 — la DPI aggiunge punti al piazzamento, le altre barche non cambiano
+      const add = (pen && pen.code==="DPI") ? (pen.pts||0) : 0;
+      scores.push(round1(pos+1+add));
+      codes.push(add ? "DPI" : null);
+      noDiscard.push(false);
+    }
+  }
+
+  // RRS A9 — punteggio medio, al decimo di punto con 0,05 per eccesso.
+  // Calcolato sui soli punteggi reali: nessun AVG entra nella media di un altro AVG.
+  for(let i=0;i<scores.length;i++) {
+    if(scores[i]!=="AVG") continue;
+    const reali = scores.map((s,k)=>({s,k})).filter(o=>typeof o.s==="number");
+    let base = reali.filter(o=>sc.judgeScore!=="avg-before" || o.k<i).map(o=>o.s);
+    // A9(b) alla prima prova non ha precedenti: si ricade sulla media di tutte
+    // le altre prove (A9(a)) anziché sul punteggio DNF, che sarebbe punitivo.
+    if(!base.length) base = reali.map(o=>o.s);
+    scores[i] = base.length ? round1(base.reduce((a,b)=>a+b,0)/base.length) : dns;
+  }
+
+  // RRS E7 — punti aggiunti a chi era di turno: si sommano al punteggio medio
+  for(let i=0;i<scores.length;i++) {
+    if(codes[i]!=="AVG") continue;
+    const p = getPenalty(i, boat.sail);
+    if(p && p.code==="DPI") { scores[i] = round1(scores[i] + (p.pts||0)); codes[i] = "DPI"; }
+  }
+
+  const played = scores.filter(s=>s!==null);
+  if(!played.length)
+    return {scores, codes, noDiscard, dneFlags:noDiscard, gross:0, disc:0, net:0, n_played:0, dns, discIndices:new Set()};
+
+  const gross       = round1(played.reduce((a,b)=>a+b,0));
+  const discIndices = findDiscardIndices(scores, noDiscard);
+  const disc        = round1([...discIndices].reduce((s,i)=>s+scores[i],0));
+
+  return {
+    scores, codes, noDiscard, dneFlags:noDiscard,
+    gross, disc, net: round1(gross-disc),
+    n_played: played.length, dns, discIndices
+  };
+}
+
+// ── Parità in classifica di serie — RRS A8 ────────────────────────────
+// Implementazione UNICA, usata sia dalla classifica sia dal riepilogo prova.
+function compareSeries(a, b) {
+  if(a.n_played===0 && b.n_played===0) return 0;
+  if(a.n_played===0) return 1;
+  if(b.n_played===0) return -1;
+  if(a.net!==b.net) return a.net-b.net;
+
+  // A8.1 — punteggi NON scartati, dal migliore al peggiore
+  const listNonScartati = x => x.scores
+    .map((v,i)=>({v,i}))
+    .filter(o=>o.v!==null && !x.discIndices.has(o.i))
+    .map(o=>o.v).sort((p,q)=>p-q);
+  const sA = listNonScartati(a), sB = listNonScartati(b);
+  for(let k=0; k<Math.min(sA.length,sB.length); k++)
+    if(sA[k]!==sB[k]) return sA[k]-sB[k];
+
+  // A8.2 — ultima prova a ritroso, gli scarti CONTANO
+  for(let r=state.config.races-1; r>=0; r--) {
+    const x=a.scores[r], y=b.scores[r];
+    if(x===null && y===null) continue;
+    if(x===null) return 1;
+    if(y===null) return -1;
+    if(x!==y) return x-y;
+  }
+  return 0;
+}
+
+// ── Etichetta di cella per la classifica ──────────────────────────────
+function scoreLabel(res, i) {
+  const s = res.scores[i];
+  if(s===null) return "—";
+  const c = res.codes[i];
+  const val = Number.isInteger(s) ? s : s.toFixed(1);
+  if(c && c!=="AVG" && CODES[c]) return val + "<sup class=\"code-tag\">" + c + "</sup>";
+  return val;
+}
+
+// ══════════════════════════════════════════════════════════════
+// RACE PAGE
+// ══════════════════════════════════════════════════════════════
+let currentRace = 0;
+
+function renderRacePage() {
+  if(!state.boats.length) {
+    document.getElementById("race-content").innerHTML=
+      `<div class="empty-state"><div class="icon">⚙️</div><p>Configura prima i partecipanti nel tab Setup</p></div>`;
+    return;
+  }
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function renderRaceTabs() {
+  const tabs = document.getElementById("race-tabs");
+  tabs.innerHTML = "";
+  for(let r=0;r<state.config.races;r++) {
+    const race=state.races[r]||{};
+    const fin = state.config.fleet==="multi" ?
+      (race.finishes_a||[]).length+(race.finishes_b||[]).length :
+      (race.finishes_a||[]).length;
+    const done = fin>0;
+    const btn = document.createElement("button");
+    btn.className="race-tab"+(r===currentRace?" active":"");
+    btn.innerHTML=`P${r+1}${done?'<span class="dot"></span>':''}`;
+    btn.onclick=(()=>{currentRace=r;renderRaceTabs();renderCurrentRace();});
+    tabs.appendChild(btn);
+  }
+  // Scroll tab attivo in vista
+  setTimeout(()=>{
+    const active=tabs.querySelector(".race-tab.active");
+    if(active) active.scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+  },50);
+}
+
+function renderCurrentRace() {
+  const r=currentRace;
+  const isMulti=state.config.fleet==="multi";
+  const race=state.races[r]||{finishes_a:[],finishes_b:[]};
+  const judgeA=getEffectiveJudge(r,"A");
+  const judgeB=isMulti?getEffectiveJudge(r,"B"):null;
+
+  document.getElementById("race-header-title").textContent=`Prova ${r+1}`;
+  const useJudge = state.useJudge;
+  const judgeEl = document.getElementById("race-header-sub");
+  if(useJudge) {
+    const jNames = isMulti
+      ? `${judgeA} — ${getBoatName(judgeA)} (A) &nbsp;/&nbsp; ${judgeB} — ${getBoatName(judgeB)} (B)`
+      : `${judgeA} — ${getBoatName(judgeA)}`;
+    judgeEl.innerHTML = `<span style="background:#FFF8E1;color:#7D4000;
+      font-family:'Barlow Condensed',sans-serif;font-weight:900;font-size:.92rem;
+      padding:3px 10px;border-radius:20px;border:2px solid var(--gold,#D4A017)">
+      &#9878; DI TURNO: ${jNames}</span>`;
+  } else {
+    judgeEl.textContent = `${state.boats.length} barche · tutte in acqua`;
+  }
+
+  const boatsA=getBoatsByFleet("A").filter(b=>!useJudge||b.sail!==judgeA);
+  const boatsB=isMulti?getBoatsByFleet("B").filter(b=>!useJudge||b.sail!==judgeB):[];
+  const totalA=boatsA.length; const totalB=boatsB.length;
+
+  let html=`<div style="padding:12px 16px 0">`;
+
+  if(isMulti) {
+    const judgeInfoA = useJudge ? ` — di turno: <b>${esc(getBoatName(judgeA))}</b> <span class="judge-badge">${judgeA}</span>` : "";
+    html+=`<div class="section-title" style="padding:0 0 8px">⛵ Flotta A${judgeInfoA}</div>`;
+  }
+  html+=renderFinishGrid("a",race.finishes_a||[],totalA,r);
+
+  if(isMulti) {
+    const judgeInfoB = useJudge ? ` — di turno: <b>${esc(getBoatName(judgeB))}</b> <span class="judge-badge">${judgeB}</span>` : "";
+    html+=`<div class="section-title" style="padding:16px 0 8px">⛵ Flotta B${judgeInfoB}</div>`;
+    html+=renderFinishGrid("b",race.finishes_b||[],totalB,r);
+  }
+
+  // ── PROTESTE PROVA ──────────────────────────────────────────────────
+  const rProt=(state.protests||[]).filter(p=>p.raceIdx===r);
+  const OI_={"pending":"⏳","dsq":"🔴","dismissed":"✅",};
+  const OL_={"pending":"In attesa","dsq":"DSQ","dismissed":"Respinta",};
+  html+=`<div style="margin-top:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;
+        color:var(--navy);text-transform:uppercase;letter-spacing:.06em">
+        ⚖️ Proteste P${r+1}
+        ${rProt.length?`<span style="background:var(--red);color:#fff;border-radius:20px;
+          padding:1px 8px;font-size:.68rem;margin-left:6px">${rProt.length}</span>`:""}</div>
+      <button onclick="openProtestsForRace(${r})"
+        style="background:var(--orange,#E67E22);color:#fff;border:none;border-radius:var(--r);
+        padding:11px 20px;font-family:'Barlow Condensed',sans-serif;font-weight:900;
+        font-size:1rem;cursor:pointer;letter-spacing:.06em;text-transform:uppercase;
+        box-shadow:0 2px 8px rgba(230,126,34,.4)">⚖️ PROTESTE</button>
+    </div>
+    ${rProt.length?rProt.map(p=>{
+      const bF=state.boats.find(b=>b.sail===p.from);
+      const bT=state.boats.find(b=>b.sail===p.to);
+      const bg=p.outcome==="dsq"?"#FFF0F0":p.outcome==="dismissed"?"#F0FFF4":"#FFF8E1";
+      const bc=p.outcome==="dsq"?"var(--red)":p.outcome==="dismissed"?"var(--green,#27AE60)":"var(--orange,#E67E22)";
+      return `<div style="background:${bg};border-left:3px solid ${bc};border-radius:var(--r);
+        padding:8px 10px;margin-bottom:6px">
+        <div style="display:flex;align-items:flex-start;gap:8px">
+          <div style="flex:1;font-size:.82rem">
+            <b>${p.from}</b>${bF?" "+bF.name.split(" ")[0]:""} →
+            <b style="color:var(--red)">${p.to}</b>${bT?" "+bT.name.split(" ")[0]:""}
+            ${p.rule?`<span style="color:var(--blue,#2563A8);font-size:.72rem;margin-left:4px">${p.rule}</span>`:""}
+            <span style="float:right;font-size:.75rem">${OI_[p.outcome]} ${OL_[p.outcome]}</span>
+          </div>
+          <button onclick="removeProtest('${p.id}')"
+            style="width:22px;height:22px;border-radius:50%;border:none;
+            background:var(--gray2,#E8ECF4);color:var(--gray4,#6B7A99);
+            cursor:pointer;font-size:.75rem;display:flex;align-items:center;
+            justify-content:center;flex-shrink:0">✕</button>
+        </div>
+        ${p.notes?`<div style="font-size:.72rem;color:var(--gray4,#6B7A99);margin-top:4px">${p.notes}</div>`:""}
+      </div>`;
+    }).join(""):`<div style="font-size:.78rem;color:var(--gray3,#B0BAD0);
+      text-align:center;padding:8px">Nessuna protesta per questa prova</div>`}
+  </div>`;
+  // Indicatore prova annullata
+  const isCancelled = state.races[r] && state.races[r].cancelled;
+  if(isCancelled) {
+    html+=`<div style="background:#FFF0F0;border:2px solid var(--red);border-radius:var(--r);
+      padding:10px 14px;text-align:center;margin-top:12px">
+      <span style="font-family:'Barlow Condensed',sans-serif;font-weight:900;color:var(--red);font-size:1rem">
+        ⚠ PROVA ANNULLATA — non conta per la serie
+      </span>
+    </div>`;
+  }
+  if(scoringCfg().a53) {
+    // Chi è di turno non è fra i partenti
+    const iscritti = isMulti ? getBoatsByFleet("A").length + getBoatsByFleet("B").length : state.boats.length;
+    const diTurno  = state.useJudge ? (isMulti ? 2 : 1) : 0;
+    const nMax = Math.max(0, iscritti - diTurno);
+    html+=`<div class="card" style="margin:12px 0 0"><div class="card-body" style="padding:12px">
+      <label style="display:block;font-size:.72rem;font-weight:600;color:var(--gray4);
+        text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px">
+        Barche in area di partenza <span class="rule-ref">A5.3</span></label>
+      <input type="number" min="0" max="${nMax}" value="${(race.starters!=null?race.starters:nMax)}"
+        onchange="setStarters(${r}, this.value)"
+        style="width:100%;padding:10px;border:2px solid var(--gray2);border-radius:var(--r);font-size:1rem">
+      <div class="hint">Determina il punteggio di DNS, DNF e DSQ per questa prova.</div>
+    </div></div>`;
+  }
+  html+=`<button class="btn btn-gold btn-block" style="margin-top:12px" onclick="confirmRace()">
+    ✅ Conferma Prova ${r+1}
+  </button>`;
+  html+=`<button onclick="cancelRace(${r})"
+    style="width:100%;padding:9px;border:1.5px solid ${isCancelled?'var(--green,#27AE60)':'var(--gray3,#B0BAD0)'};
+    border-radius:var(--r);background:transparent;
+    color:${isCancelled?'var(--green,#27AE60)':'var(--gray4,#6B7A99)'};
+    font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.82rem;
+    cursor:pointer;margin-top:6px;letter-spacing:.04em">
+    ${isCancelled?'↩ Ripristina Prova':'⚠ Annulla Prova (non valida)'}
+  </button>`;
+  if(r<state.config.races-1)
+    html+=`<button class="btn btn-primary btn-block" style="margin-top:8px" onclick="nextRace()">
+      Avanti → Prova ${r+2}
+    </button>`;
+  html+="</div>";
+  document.getElementById("race-content").innerHTML=html;
+}
+
+function tapBoat(fleet, sail, raceIdx) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  freezeJudge(raceIdx);
+  const arr = fleet==="a" ? race.finishes_a : race.finishes_b;
+  const idx = arr.indexOf(sail);
+  if(idx !== -1) {
+    // Già presente → rimuovi (undo)
+    arr.splice(idx, 1);
+  } else {
+    // Non presente → aggiungi in coda (prossima posizione)
+    arr.push(sail);
+  }
+  saveState();
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function clearAll(fleet, raceIdx) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  if(fleet==="a") race.finishes_a=[];
+  else            race.finishes_b=[];
+  saveState();
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function undoLast(fleet, raceIdx) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  const arr = fleet==="a" ? race.finishes_a : race.finishes_b;
+  if(arr.length) arr.pop();
+  saveState();
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function renderFinishGrid(fleet, finishes, total, raceIdx) {
+  const judgeKey = fleet==="a" ? "A" : "B";
+  const judge    = state.useJudge ? getEffectiveJudge(raceIdx, judgeKey) : null;
+  const allBoats = getBoatsByFleet(judgeKey)
+    .filter(b => !state.useJudge || b.sail !== judge);
+  const placed   = finishes;
+  const done     = placed.length === allBoats.length;
+
+  // ── GRIGLIA POSIZIONI ─────────────────────────────────────────────
+  let grid = '<div style="padding:0 0 8px">';
+  if(!placed.length) {
+    grid += '<div style="text-align:center;padding:18px 0;color:var(--gray3);font-size:.9rem;font-style:italic">Tocca le barche qui sotto nell\'ordine di arrivo</div>';
+  } else {
+    grid += '<div style="display:flex;flex-direction:column;gap:5px">';
+    placed.forEach(function(sail,i) {
+      const boat = state.boats.find(b=>b.sail===sail);
+      const medal = i===0?"🥇":i===1?"🥈":i===2?"🥉":"";
+      const pos   = medal || ((i+1)+"°");
+      const borderCol = i===0?"var(--gold,#D4A017)":i===1?"#A0A0A0":i===2?"#CD7F32":"var(--gray2)";
+      const bgCol     = i===0?"var(--gold-light,#FFF8E1)":"var(--gray1,#F4F6FA)";
+      grid += '<div style="display:flex;align-items:center;gap:10px;background:'+bgCol+';border-radius:var(--r);padding:8px 12px;border-left:4px solid '+borderCol+'">'
+        + '<div style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:1.1rem;color:var(--navy);min-width:36px;text-align:center">'+pos+'</div>'
+        + '<div style="flex:1">'
+        + '<span style="font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:1.1rem;color:var(--navy)">'+sail+'</span>'
+        + '<span style="font-size:.85rem;color:var(--gray4);margin-left:6px">'+esc(boat?boat.name:"")+'</span>'
+        + '</div>'
+        + '<button onclick="tapBoat(\''+fleet+'\',\''+sail+'\','+raceIdx+')" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--gray2,#E8ECF4);color:var(--gray4,#6B7A99);cursor:pointer;font-size:.8rem;flex-shrink:0">✕</button>'
+        + '</div>';
+    });
+    grid += '</div>';
+  }
+  grid += '</div>';
+
+  // ── CHIP BARCHE ───────────────────────────────────────────────────
+  let chips = '<div style="margin-top:4px">';
+  chips += '<div style="font-size:.7rem;font-weight:600;color:var(--gray4);text-transform:uppercase;letter-spacing:.08em;margin-bottom:8px;padding:0 2px">'
+         + (done ? "✅ Tutti arrivati — tocca ✕ per correggere" : "Tocca nell\'ordine di arrivo")
+         + '</div>';
+  chips += '<div style="display:flex;flex-wrap:wrap;gap:7px;margin-bottom:8px">';
+  allBoats.forEach(function(b) {
+    const idx = placed.indexOf(b.sail);
+    const isPlaced = idx !== -1;
+    const border = isPlaced ? "var(--gray2,#E8ECF4)" : "var(--navy)";
+    const bg     = isPlaced ? "var(--gray1,#F4F6FA)" : "var(--navy)";
+    const col    = isPlaced ? "var(--gray3,#B0BAD0)" : "#fff";
+    const strike = isPlaced ? "text-decoration:line-through;" : "";
+    const badge  = isPlaced
+      ? '<span style="position:absolute;top:-6px;right:-6px;background:var(--gold,#D4A017);color:var(--navy);border-radius:50%;width:18px;height:18px;font-size:.65rem;font-weight:900;display:flex;align-items:center;justify-content:center;line-height:1;border:1.5px solid #fff">'+(idx+1)+'</span>'
+      : "";
+    chips += '<button onclick="tapBoat(\''+fleet+'\',\''+b.sail+'\','+raceIdx+')" '
+           + 'style="padding:9px 14px;border-radius:var(--r);cursor:pointer;font-family:\'Barlow Condensed\',sans-serif;font-weight:900;font-size:1rem;letter-spacing:.04em;transition:.1s;position:relative;border:2px solid '+border+';background:'+bg+';color:'+col+';'+strike+'">'
+           + b.sail + badge
+           + '</button>';
+  });
+  chips += '</div>';
+
+  if(placed.length > 0) {
+    chips += '<button onclick="undoLast(\''+fleet+'\','+raceIdx+')" '
+           + 'style="width:100%;padding:8px;border:1.5px solid var(--gray3,#B0BAD0);border-radius:var(--r);background:transparent;color:var(--gray4,#6B7A99);font-family:\'Barlow Condensed\',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;letter-spacing:.04em">'
+           + '↩ Annulla ultimo ('+placed[placed.length-1]+')'
+           + '</button>';
+  }
+  chips += '</div>';
+
+  return '<div class="card" style="margin:0 0 8px"><div class="card-body" style="padding:10px 12px">'
+       + grid
+       + '<div style="border-top:1px solid var(--gray2,#E8ECF4);margin:8px 0 10px"></div>'
+       + chips
+       + '</div></div>';
+}
+
+function clearSlot(fleet,pos,raceIdx) {
+  const race=state.races[raceIdx];
+  const arr=fleet==="a"?race.finishes_a:race.finishes_b;
+  arr.splice(pos,1);
+  saveState();
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function confirmRace() {
+  const race = state.races[currentRace];
+  if(race) {
+    freezeJudge(currentRace);
+    race.confirmed = true;   // da qui in poi le assenti valgono DNF
+  }
+  saveState();
+  renderRaceTabs();
+  // Mostra riepilogo prova prima di avanzare
+  showRaceSummary(currentRace);
+}
+
+function nextRace() {
+  currentRace=Math.min(currentRace+1,state.config.races-1);
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+// ══════════════════════════════════════════════════════════════
+// PICKER
+// ══════════════════════════════════════════════════════════════
+let pickerCallback=null;
+
+function openPicker(fleet,pos,raceIdx) {
+  const judgeKey=fleet==="a"?"A":"B";
+  const judge=getEffectiveJudge(raceIdx,judgeKey);
+  const race=state.races[raceIdx];
+  const finishes=fleet==="a"?race.finishes_a:race.finishes_b;
+  const available=getBoatsByFleet(judgeKey==="A"?fleet==="a"?"A":"B":fleet==="b"?"B":"A")
+    .filter(b=>!state.useJudge||b.sail!==judge);
+
+  document.getElementById("picker-title").textContent=`Posizione ${pos+1}°`;
+  const grid=document.getElementById("picker-grid");
+  grid.innerHTML=available.map(b=>{
+    const inList=finishes.indexOf(b.sail);
+    const isHere=inList===pos;
+    const usedElsewhere=inList!==-1&&inList!==pos;
+    return `<div class="picker-boat${usedElsewhere?" used":""}" onclick="selectBoat('${fleet}',${pos},${raceIdx},'${b.sail}')">
+      <div class="p-sail">${b.sail}</div>
+      <div class="p-name">${b.name}</div>
+    </div>`;
+  }).join("");
+
+
+  document.getElementById("picker").style.display="flex";
+  pickerCallback={fleet,pos,raceIdx};
+}
+
+function selectBoat(fleet,pos,raceIdx,sail) {
+  const race=state.races[raceIdx];
+  if(race) freezeJudge(raceIdx);
+  const arr=fleet==="a"?race.finishes_a:race.finishes_b;
+  // Rimuovi da posizione precedente se già presente
+  const prev=arr.indexOf(sail);
+  if(prev!==-1) arr.splice(prev,1);
+  // Inserisci nella posizione corretta
+  arr.splice(pos,0,sail);
+  closePicker();
+  saveState();
+  renderRaceTabs();
+  renderCurrentRace();
+}
+
+function closePicker() {
+  document.getElementById("picker").style.display="none";
+}
+
+// ══════════════════════════════════════════════════════════════
+// STANDINGS
+// ══════════════════════════════════════════════════════════════
+function toggleFleetView() {
+  state.currentFleetView=state.currentFleetView==="A"?"B":"A";
+  document.getElementById("fleet-tab-badge").textContent="FL."+state.currentFleetView;
+  renderStandings();
+}
+
+function renderStandings() {
+  const isMulti=state.config.fleet==="multi";
+  const fleet=isMulti?state.currentFleetView:"A";
+  const boats=isMulti?getBoatsByFleet(fleet):state.boats;
+  const badge=document.getElementById("fleet-tab-badge");
+  badge.style.display=isMulti?"block":"none";
+  document.getElementById("standings-sub").textContent=
+    isMulti?`Flotta ${fleet} · aggiornata in tempo reale`:"Aggiornata in tempo reale";
+
+  // Calcola scores
+  const results=boats.map(b=>{
+    const r=calcScore(b,fleet);
+    return {boat:b,...r};
+  }).filter(r=>r.n_played>0||r.gross===0);
+
+  // Ordinamento: RRS A8 — implementazione unica condivisa
+  results.sort(compareSeries);
+
+  // Prove disputate (colonne da mostrare)
+  const maxRace=state.config.races;
+  const thead=document.getElementById("standings-thead");
+  const tbody=document.getElementById("standings-tbody");
+
+  thead.innerHTML=`<th>Pos</th><th>Velico / Skipper</th>
+    ${Array.from({length:maxRace},(_,i)=>`<th>P${i+1}</th>`).join("")}
+    <th>Lordi</th><th>Sc.</th><th>Netti</th>`;
+
+  if(!results.length) {
+    tbody.innerHTML=`<tr><td colspan="${maxRace+5}" style="text-align:center;padding:24px;color:var(--gray3)">
+      Nessun risultato ancora inserito</td></tr>`;
+    renderSummary(0,0,fleet);
+    return;
+  }
+
+  tbody.innerHTML=results.map((r,idx)=>{
+    const pos=idx+1;
+    const discIdx=r.discIndices;
+    const posCls=pos<=3?`pos-${pos}`:"";
+    const posHTML=pos<=3?`<span class="pos-badge">${pos}</span>`:pos;
+    const raceCells=r.scores.map((s,i)=>{
+      if(state.races[i] && state.races[i].cancelled)
+        return `<td style="color:var(--gray3);text-decoration:line-through;font-style:italic"
+                    title="Prova annullata">—</td>`;
+      if(s===null) return `<td style="color:var(--gray3)">—</td>`;
+      const code   = r.codes[i];
+      const isDisc = discIdx.has(i);
+      const isAvg  = code==="AVG";
+      const isDnf  = code && CODES[code] && CODES[code].dnf;
+      const fixed  = r.noDiscard[i];
+      let cls = "score-cell" + (isDisc ? " score-discard" : (isAvg ? " score-avg" : (isDnf ? " score-dns" : "")));
+      const val = Number.isInteger(s) ? s : s.toFixed(1);
+      if(code==="AVG")
+        return `<td class="${cls}">${val}<sup style="font-size:.55rem;font-weight:900;
+          color:var(--blue)" title="Punteggio medio — turno di giuria">AVG</sup></td>`;
+      const tag = (code && code!=="AVG")
+        ? `<sup style="font-size:.58rem;font-weight:900;color:${fixed?"var(--red)":"var(--gray4)"}"
+                title="${esc(CODES[code] ? CODES[code].desc : code)}">${code}</sup>` : "";
+      return `<td class="${cls}">${val}${tag}</td>`;
+    }).join("");
+    const tieNote = results.filter(x=>x.net===r.net&&x.n_played>0).length>1 ?
+      `<span style="font-size:.55rem;color:var(--gray3);display:block;line-height:1.2">RRS A8</span>` : "";
+    return `<tr class="${posCls}">
+      <td style="vertical-align:middle">${posHTML}${tieNote}</td>
+      <td style="white-space:nowrap">
+        <b>${esc(r.boat.sail)}</b> ${esc(r.boat.name)}${getProtestDot(r.boat.sail)}
+        <button onclick="openPenalty('${esc(r.boat.sail)}')" title="Penalità / codici RRS"
+          style="border:none;background:var(--gray2);color:var(--gray4);border-radius:50%;
+          width:22px;height:22px;font-size:.7rem;cursor:pointer;margin-left:6px">&#9878;</button>
+      </td>
+      ${raceCells}
+      <td>${Number.isInteger(r.gross)?r.gross:r.gross.toFixed(1)}</td>
+      <td style="color:var(--red)">${Number.isInteger(r.disc)?r.disc:r.disc.toFixed(1)}</td>
+      <td class="net-score">${Number.isInteger(r.net)?r.net:r.net.toFixed(1)}</td>
+    </tr>`;
+  }).join("");
+
+  renderSummary(results.length, state.races.filter(r=>(r.finishes_a||[]).length>0).length, fleet);
+  renderProtestTable();
+}
+
+function renderSummary(nboats, nraces, fleet) {
+  const isMulti = state.config.fleet==="multi";
+  const n_bar   = isMulti ? getBoatsByFleet(fleet).length : state.boats.length;
+  const valide  = countPlayed(fleet);        // per flotta, prove annullate escluse
+  const s = document.getElementById("standings-summary");
+  s.innerHTML = `
+    <div class="summary-card"><div class="val">${n_bar}</div><div class="lbl">Barche</div></div>
+    <div class="summary-card"><div class="val">${valide}</div><div class="lbl">Prove</div></div>
+    <div class="summary-card"><div class="val">${getDiscards(valide)}</div><div class="lbl">Scarti</div></div>
+    <div class="summary-card"><div class="val">${n_bar+1}</div><div class="lbl">DNF/DNS</div></div>
+  `;
+}
+
+// ══════════════════════════════════════════════════════════════
+// ROTATION
+// ══════════════════════════════════════════════════════════════
+function renderRotation() {
+  const isMulti=state.config.fleet==="multi";
+  const list=document.getElementById("rotation-list");
+  const fair=document.getElementById("fairness-list");
+
+  if(!state.boats.length) {
+    list.innerHTML="<p style='color:var(--gray3);text-align:center;padding:12px'>Nessun partecipante inserito</p>";
+    return;
+  }
+  if(!state.useJudge) {
+    list.innerHTML="<p style='color:var(--gray3);text-align:center;padding:12px'>Nessun turno di giuria: il giudice a terra è esterno agli iscritti</p>";
+    fair.innerHTML="";
+    return;
+  }
+
+  // Piano rotazione
+  let html="";
+  for(let r=0;r<state.config.races;r++) {
+    const judgeA=getAutoJudge(r,"A");
+    const effA=getEffectiveJudge(r,"A");
+    const judgeB=isMulti?getAutoJudge(r,"B"):null;
+    const effB=isMulti?getEffectiveJudge(r,"B"):null;
+    const isDone=(state.races[r]?.finishes_a||[]).length>0;
+    html+=`<div class="rot-item">
+      <div class="rot-num ${isDone?"":""}" style="${isDone?"color:var(--green)":""}">P${r+1}</div>
+      <div class="rot-judge">
+        <div style="font-weight:600">${getBoatName(effA)} <span style="font-family:'Barlow Condensed';font-weight:900;color:var(--navy)">${effA}</span>
+          ${isMulti?`<span class="fleet-pill A">A</span>`:""}
+          ${effA!==judgeA?`<span style="font-size:.7rem;color:var(--orange)">⚡ override</span>`:""}</div>
+        ${isMulti?`<div style="margin-top:4px;font-weight:600">${getBoatName(effB)} <span style="font-family:'Barlow Condensed';font-weight:900;color:var(--blue)">${effB}</span>
+          <span class="fleet-pill B">B</span>
+          ${effB!==judgeB?`<span style="font-size:.7rem;color:var(--orange)">⚡ override</span>`:""}</div>`:""}
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+        <input class="rot-override" type="text" placeholder="Override A"
+          value="${state.overrides[r+"_A"]||""}"
+          oninput="setOverride(${r},'A',this.value)"
+          ${isDone?"style='opacity:.5'":""} maxlength="5">
+        ${isMulti?`<input class="rot-override" type="text" placeholder="Override B"
+          value="${state.overrides[r+"_B"]||""}"
+          oninput="setOverride(${r},'B',this.value)" maxlength="5">`:""}
+      </div>
+    </div>`;
+  }
+  list.innerHTML=html;
+
+  // Fairness
+  const fleets=isMulti?["A","B"]:["A"];
+  let fhtml="";
+  fleets.forEach(fl=>{
+    const boats=getBoatsByFleet(fl);
+    if(isMulti) fhtml+=`<div style="font-family:'Barlow Condensed';font-weight:700;font-size:.85rem;color:var(--gray4);padding:4px 0 8px">Flotta ${fl}</div>`;
+    boats.forEach(b=>{
+      const cnt=state.races.reduce((acc,_,r)=>acc+(getEffectiveJudge(r,fl)===b.sail?1:0),0);
+      const n_played=state.races.filter(r=>(r.finishes_a||[]).length>0).length;
+      const n_boats=boats.length;
+      const expected=n_boats?Math.floor(n_played/n_boats):0;
+      const eq=cnt===0?"—":(cnt===expected?"✓ equo":(cnt>expected?"↑ uno in più":"↓ uno in meno"));
+      const eqColor=cnt===0?"var(--gray3)":(cnt===expected?"var(--green)":"var(--orange)");
+      fhtml+=`<div class="boat-item" style="padding:8px 0">
+        <div class="sail-badge ${fl==="B"?"fleet-b":""}" style="width:38px;height:38px;font-size:.9rem">${b.sail}</div>
+        <div class="boat-info"><div class="boat-name">${b.name}</div></div>
+        <div style="text-align:right">
+          <div style="font-family:'Barlow Condensed';font-weight:900;font-size:1.2rem;color:var(--navy)">${cnt}</div>
+          <div style="font-size:.7rem;color:${eqColor}">${eq}</div>
+        </div>
+      </div>`;
+    });
+  });
+  fair.innerHTML=fhtml||"<p style='color:var(--gray3);text-align:center;padding:12px'>—</p>";
+}
+
+function setOverride(raceIdx, fleet, val) {
+  const key=raceIdx+"_"+fleet;
+  if(val.trim()) state.overrides[key]=val.trim();
+  else delete state.overrides[key];
+  saveState();
+}
+
+// ══════════════════════════════════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════════════════════════════════
+function getBoatName(sail) {
+  const b=state.boats.find(b=>b.sail===sail);
+  return b?b.name:sail||"—";
+}
+
+function showConfirm(title,msg,onOk) {
+  document.getElementById("confirm-title").textContent=title;
+  document.getElementById("confirm-msg").textContent=msg;
+  document.getElementById("confirm-overlay").style.display="flex";
+  document.getElementById("confirm-ok").onclick=()=>{closeConfirm();onOk();};
+}
+function closeConfirm() {
+  document.getElementById("confirm-overlay").style.display="none";
+}
+
+function syncUI() {
+  // Ripristina config
+  const c = state.config, sc = scoringCfg();
+  const set = (id,val) => { const el=document.getElementById(id); if(el && val!=null && val!=="") el.value=val; };
+  set("cfg-name", c.name);      set("cfg-class", c.classe);   set("cfg-club", c.club);
+  set("cfg-venue", c.venue);    set("cfg-officer", c.officer);
+  set("cfg-date", c.date);      set("cfg-date-end", c.dateEnd);
+  set("cfg-races", c.races);    set("cfg-minraces", c.minRaces);
+  set("cfg-email", c.resultEmail);
+  set("cfg-discmode", sc.discardMode);   set("cfg-discafter", sc.discardAfter);
+  set("cfg-discevery", sc.discardEvery); set("cfg-a53", String(!!sc.a53));
+  set("cfg-judgescore", sc.judgeScore);
+  syncDiscardUI(); applyBranding();
+  fleetMode=state.config.fleet||"single";
+  const useJ=state.useJudge||state.config.useJudge||false;
+  state.useJudge=useJ;
+  document.querySelectorAll("#judge-off-btn,#judge-on-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById(useJ?"judge-on-btn":"judge-off-btn").classList.add("active");
+  document.getElementById("nav-rotation").style.display=useJ?"flex":"none";
+  const jsw=document.getElementById("judge-score-wrap");
+  if(jsw) jsw.style.display = useJ?"block":"none";
+  const btns=document.querySelectorAll(".toggle-btn");
+  btns.forEach(b=>b.classList.remove("active"));
+  btns[fleetMode==="multi"?1:0].classList.add("active");
+  if(fleetMode==="multi") document.getElementById("fleet-select-wrap").style.display="block";
+  renderBoatList();
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// EXPORT EXCEL
+// ══════════════════════════════════════════════════════════════════════
+function buildExcelData() {
+  const isMulti = state.config.fleet === "multi";
+  const fleets  = isMulti ? ["A","B"] : ["A"];
+  const wb = XLSX.utils.book_new();
+
+  // ── Foglio 1: ARRIVI ──────────────────────────────────────────────
+  // Header: POS | Velico | Nome | P1 | P2 | ... | Pn
+  const arrHeader = ["POS","VELICO","NOME"];
+  for(let r=0; r<state.config.races; r++) arrHeader.push("P"+(r+1));
+
+  const arrRows = [arrHeader];
+  const maxPos = state.boats.length;
+
+  fleets.forEach(fl => {
+    if(isMulti) {
+      arrRows.push(["--- FLOTTA "+fl+" ---"]);
+    }
+    // Per ogni posizione (1..N) nelle prove
+    for(let pos=0; pos<maxPos; pos++) {
+      const row = [pos+1, "", ""];
+      for(let r=0; r<state.config.races; r++) {
+        const race = state.races[r] || {};
+        const fin  = isMulti ? (fl==="A" ? race.finishes_a : race.finishes_b) : race.finishes_a;
+        const sail = (fin || [])[pos] || "";
+        if(pos===0 && r===0) {} // intestazione già
+        const boat = state.boats.find(b=>b.sail===sail);
+        if(pos===0 && r===0) {
+          row[1] = sail;
+          row[2] = boat ? boat.name : "";
+        }
+        row.push(sail ? sail : "");
+      }
+      // Metti velico e nome dalla prima prova trovata
+      for(let r=0; r<state.config.races; r++) {
+        const race = state.races[r] || {};
+        const fin  = isMulti ? (fl==="A" ? race.finishes_a : race.finishes_b) : race.finishes_a;
+        const sail = (fin || [])[pos] || "";
+        if(sail) {
+          const boat = state.boats.find(b=>b.sail===sail);
+          // non possiamo mettere velico/nome per posizione — facciamo per barca
+        }
+      }
+      arrRows.push(row);
+    }
+  });
+
+  // Ricostruiamo ARRIVI in modo più utile: barca x prova (posizione)
+  const arr2Header = ["N°","VELICO","NOME","FLOTTA"];
+  for(let r=0; r<state.config.races; r++) arr2Header.push("P"+(r+1));
+  arr2Header.push("GIUDICE");
+
+  const arr2Rows = [arr2Header];
+  state.boats.forEach((boat,idx) => {
+    const fl = boat.fleet || "A";
+    const row = [idx+1, boat.sail, boat.name, fl];
+    for(let r=0; r<state.config.races; r++) {
+      const race = state.races[r] || {};
+      const fin  = isMulti ? (fl==="A" ? race.finishes_a : race.finishes_b) : race.finishes_a;
+      const pos  = (fin||[]).indexOf(boat.sail);
+      const judge = getEffectiveJudge(r, fl);
+      if(boat.sail === judge) {
+        row.push("GIUDICE");
+      } else if(pos !== -1) {
+        row.push(pos+1);
+      } else if((fin||[]).length > 0) {
+        row.push("DNS");
+      } else {
+        row.push("");
+      }
+    }
+    // Conta giudizi
+    let nGiudizi = 0;
+    for(let r=0; r<state.config.races; r++) {
+      if(getEffectiveJudge(r, fl) === boat.sail) nGiudizi++;
+    }
+    row.push(nGiudizi ? nGiudizi+" giudizi" : "");
+    arr2Rows.push(row);
+  });
+
+  const wsArr = XLSX.utils.aoa_to_sheet(arr2Rows);
+  // Larghezze colonne
+  wsArr["!cols"] = [
+    {wch:4},{wch:8},{wch:22},{wch:8},
+    ...Array(state.config.races).fill({wch:6}),
+    {wch:14}
+  ];
+  XLSX.utils.book_append_sheet(wb, wsArr, "ARRIVI");
+
+  // ── Foglio 2+: CLASSIFICA (per ogni flotta) ─────────────────────────
+  fleets.forEach(fl => {
+    const boats = isMulti ? getBoatsByFleet(fl) : state.boats;
+    const label = isMulti ? "CLASSIFICA_"+fl : "CLASSIFICA";
+    const nBoats = boats.length;
+    const dns = nBoats + 1;
+
+    // Calcola risultati
+    const results = boats.map(b => {
+      const res = calcScore(b, fl);
+      return { boat:b, ...res };
+    }).filter(r => r.n_played > 0 || r.gross === 0);
+
+    results.sort((a,b) => {
+      if(a.n_played===0 && b.n_played===0) return 0;
+      if(a.n_played===0) return 1;
+      if(b.n_played===0) return -1;
+      if(a.net !== b.net) return a.net - b.net;
+      // ── RRS A8.1: ordina punteggi best-to-worst, prima differenza ─
+      // "No excluded scores shall be used" → usa solo i punteggi NON scartati
+      {
+        const discA = a.discIndices;
+        const discB = b.discIndices;
+        const sortedA = a.scores.map((s,i)=>({s,i})).filter(x=>x.s!==null&&!discA.has(x.i)).map(x=>x.s).sort((x,y)=>x-y);
+        const sortedB = b.scores.map((s,i)=>({s,i})).filter(x=>x.s!==null&&!discB.has(x.i)).map(x=>x.s).sort((x,y)=>x-y);
+        for(let k=0; k<Math.min(sortedA.length,sortedB.length); k++) {
+          if(Math.round(sortedA[k]*10)!==Math.round(sortedB[k]*10)) return sortedA[k]-sortedB[k];
+        }
+      }
+      // ── RRS A8.2: ultima prova → penultima (anche gli scarti contano) ─
+      // "These scores shall be used even if some of them are excluded scores"
+      for(let r=state.config.races-1; r>=0; r--) {
+        const sa=a.scores[r], sb=b.scores[r];
+        if(sa===null && sb===null) continue;
+        if(sa===null) return 1;
+        if(sb===null) return -1;
+        if(Math.round(sa*10)!==Math.round(sb*10)) return sa-sb;
+      }
+      return 0; // parità assoluta
+    });
+
+    // Intestazioni
+    const clsHeader = ["POS","VELICO","NOME SKIPPER","CIRCOLO"];
+    for(let r=0; r<state.config.races; r++) clsHeader.push("P"+(r+1));
+    clsHeader.push("LORDI","SCARTI","NETTI","N°PROVE");
+
+    const clsRows = [clsHeader];
+
+    results.forEach((res,idx) => {
+      const pos = idx+1;
+      const discIdx = res.discIndices;
+      const row = [pos, res.boat.sail, res.boat.name, res.boat.club||state.config.club||""];
+      res.scores.forEach((s,i) => {
+        if(s === null) { row.push(""); return; }
+        const isDisc = discIdx.has(i);
+        const isAvg  = typeof s === "number" && s%1!==0 && s<dns;
+        const isDns  = typeof s === "number" && s >= dns;
+        let cell = s !== null ? (Number.isInteger(s) ? s : parseFloat(s.toFixed(1))) : "";
+        // Nota testuale per AVG e DNS
+        row.push(cell);
+      });
+      const fmtNum = n => Number.isInteger(n)?n:parseFloat(n.toFixed(1));
+      row.push(fmtNum(res.gross), fmtNum(res.disc), fmtNum(res.net), res.n_played);
+      clsRows.push(row);
+    });
+
+    // Riga info
+    const n_played = state.races.filter(r=>(r.finishes_a||[]).length>0).length;
+    clsRows.push([]);
+    clsRows.push(["","","Prove disputate: "+n_played+"/"+state.config.races,
+      "Scarti: "+getDiscards(n_played),"DNS/DNF = "+(nBoats+1)+" pt"]);
+    clsRows.push(["","","Sistema: Low Point (RRS Appendice A)",
+      "Giudice AVG: RRS A9"]);
+    clsRows.push(["","","Regata: "+state.config.name,
+      "Data: "+state.config.date]);
+    clsRows.push(["","","Generato da RC Sails Scoring — Punteggio Minimo RRS App. A"]);
+
+    const wsCls = XLSX.utils.aoa_to_sheet(clsRows);
+    wsCls["!cols"] = [
+      {wch:5},{wch:8},{wch:24},{wch:10},
+      ...Array(state.config.races).fill({wch:6}),
+      {wch:8},{wch:8},{wch:8},{wch:7}
+    ];
+    XLSX.utils.book_append_sheet(wb, wsCls, label);
+  });
+
+  return wb;
+}
+
+function getExcelFilename() {
+  const date = state.config.date || new Date().toISOString().slice(0,10);
+  const pulisci = s => (s||"").replace(/[^a-zA-Z0-9]/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,"");
+  const club = pulisci(state.config.club);
+  const name = pulisci(state.config.name) || "Regata";
+  return [club, name, date].filter(Boolean).join("_") + ".xlsx";
+}
+
+function exportExcel() {
+  if(!state.boats.length) { alert("Nessun partecipante inserito"); return; }
+  const wb   = buildExcelData();
+  const name = getExcelFilename();
+  XLSX.writeFile(wb, name);
+  showToast("📊 File Excel scaricato: "+name);
+}
+
+function exportAndEmail() {
+  if(!state.boats.length) { alert("Nessun partecipante inserito"); return; }
+
+  const email    = "ilgrisa@tiscali.it";
+  const n_played = state.races.filter(r=>(r.finishes_a||[]).length>0).length;
+  const isMulti  = state.config.fleet==="multi";
+
+  // ── Corpo email: breve per rispettare i limiti mailto (2000 car max) ──
+  const fleets = isMulti ? ["A","B"] : ["A"];
+  let lines = [];
+  lines.push("Regata: " + state.config.name);
+  lines.push("Data: " + state.config.date);
+  lines.push("Prove: " + n_played + "/" + state.config.races
+           + "  Scarti: " + getDiscards(n_played));
+  lines.push("");
+
+  fleets.forEach(fl => {
+    const boats = isMulti ? getBoatsByFleet(fl) : state.boats;
+    const results = boats.map(b=>({boat:b,...calcScore(b,fl)}))
+      .filter(r=>r.n_played>0)
+      .sort((a,b)=>{
+        if(a.net!==b.net) return a.net-b.net;
+        for(let r=state.config.races-1;r>=0;r--){
+          const sa=a.scores[r],sb=b.scores[r];
+          if(sa===null&&sb===null) continue;
+          if(sa===null) return 1; if(sb===null) return -1;
+          if(sa!==sb) return sa-sb;
+        } return 0;
+      });
+    if(isMulti) lines.push("-- Flotta "+fl+" --");
+    results.forEach((r,i)=>{
+      const tie = results.filter(x=>x.net===r.net).length>1?"*":"";
+      lines.push((i+1)+". "+r.boat.sail+" "+r.boat.name
+               +"  Lordi:"+(Number.isInteger(r.gross)?r.gross:r.gross.toFixed(1))
+               +" Sc:"+(Number.isInteger(r.disc)?r.disc:r.disc.toFixed(1))
+               +" Netti:"+(Number.isInteger(r.net)?r.net:r.net.toFixed(1))+tie);
+    });
+    lines.push("");
+  });
+  lines.push("(file Excel allegato)");
+  lines.push("RC Sails Scoring - Punteggio Minimo RRS App. A");
+
+  const body    = lines.join("\n");
+  const subject = "Risultati Regata DF65 - " + state.config.name + " - " + state.config.date;
+  const mailto  = "mailto:" + email
+                + "?subject=" + encodeURIComponent(subject)
+                + "&body="    + encodeURIComponent(body);
+
+  // ── 1. Scarica Excel (gesto utente diretto) ───────────────────────────
+  const wb   = buildExcelData();
+  const name = getExcelFilename();
+  XLSX.writeFile(wb, name);
+
+  // ── 2. Apri client email (stesso gesto, nessun popup) ─────────────────
+  // window.location.href è il metodo più affidabile per mailto su tutti i browser
+  window.location.href = mailto;
+
+  // ── 3. Toast informativo dopo un attimo ───────────────────────────────
+  setTimeout(()=>{
+    showToast("📧 Client email aperto — allega: " + name, false);
+  }, 800);
+}
+
+// Toast notification
+function showToast(msg, success=false) {
+  const t = document.createElement("div");
+  t.textContent = msg;
+  const bg = success ? "var(--green)" : "var(--navy)";
+  t.style.cssText = `position:fixed;bottom:calc(var(--nav-h)+16px);left:50%;
+    transform:translateX(-50%);background:${bg};color:white;
+    padding:10px 20px;border-radius:24px;font-family:'Barlow Condensed',sans-serif;
+    font-weight:700;font-size:.9rem;z-index:500;
+    box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;
+    transition:opacity .3s;`;
+  document.body.appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 3000);
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// RACE SUMMARY — riepilogo dopo ogni prova
+// ══════════════════════════════════════════════════════════════════════
+function showRaceSummary(raceIdx) {
+  const isMulti = state.config.fleet === "multi";
+  const fleet   = state.currentFleetView || "A";
+  const boats   = isMulti ? getBoatsByFleet(fleet) : state.boats;
+  const dns     = boats.length + 1;
+
+  // Calcola classifica corrente
+  const results = boats.map(b=>({boat:b,...calcScore(b,fleet)}))
+    .filter(r=>r.n_played>0)
+    .sort(compareSeries);
+
+  if(!results.length) { nextRace(); return; }
+
+  const leader = results[0];
+  document.getElementById("sum-race-label").textContent =
+    `Prova ${raceIdx+1} completata`;
+  document.getElementById("sum-leader-name").textContent = leader.boat.name;
+  document.getElementById("sum-leader-sail").textContent =
+    `Velico ${leader.boat.sail}${isMulti?" · Flotta "+fleet:""}`;
+  document.getElementById("sum-leader-pts").textContent =
+    Number.isInteger(leader.net)?leader.net:leader.net.toFixed(1);
+
+  // Podio (top 5)
+  const podium = document.getElementById("sum-podium");
+  const podiumBg = ["#D4A017","#C0C0C0","#CD7F32","#E8ECF4","#E8ECF4"];
+  const podiumFg = ["#0D1F3C","#333","#fff","#6B7A99","#6B7A99"];
+  podium.innerHTML = results.slice(0,5).map((r,i)=>`
+    <div style="display:flex;align-items:center;gap:8px;font-size:.9rem">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;
+        width:28px;height:28px;border-radius:50%;display:flex;align-items:center;
+        justify-content:center;font-size:.85rem;flex-shrink:0;
+        background:${podiumBg[i]};color:${podiumFg[i]}">${i+1}</div>
+      <div style="flex:1;font-weight:500"><b>${esc(r.boat.sail)}</b> ${esc(r.boat.name)}</div>
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:900;color:#1B3A6B">${Number.isInteger(r.net)?r.net:r.net.toFixed(1)} pt</div>
+    </div>`).join("");
+
+  const sumEl = document.getElementById("race-summary");
+  sumEl.style.display="flex";
+  sumEl.style.alignItems="center";
+  sumEl.style.justifyContent="center";
+  // Auto-dismiss dopo 8 secondi
+  setTimeout(closeSummary, 8000);
+}
+
+function closeSummary() {
+  document.getElementById("race-summary").style.display="none";
+  if(currentRace<state.config.races-1) nextRace();
+  else navigate("standings");
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// DSQ — segnala penalità da classifica
+// ══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// PENALITÀ E CODICI DI PUNTEGGIO — RRS A10 / E7
+// Ogni penalità è reversibile: l'ordine d'arrivo registrato non viene
+// mai alterato, la penalità è un livello sovrapposto.
+// ══════════════════════════════════════════════════════════════════════
+function openPenalty(sail) {
+  const boat = state.boats.find(b=>b.sail===sail);
+  if(!boat) return;
+  const fl = fleetOf(boat);
+
+  const raceOpts = [];
+  for(let r=0;r<state.config.races;r++) {
+    const cur = getPenalty(r, sail);
+    raceOpts.push(`<option value="${r}">Prova ${r+1}${cur?" — "+cur.code:""}</option>`);
+  }
+  const codeOpts = Object.keys(CODES)
+    .map(c=>`<option value="${c}">${c} — ${esc(CODES[c].desc)}</option>`).join("");
+
+  const attive = [];
+  for(let r=0;r<state.config.races;r++) {
+    const p = getPenalty(r, sail);
+    if(p) attive.push(`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;
+        border-bottom:1px solid var(--gray2)">
+        <b style="font-family:'Barlow Condensed',sans-serif;color:var(--navy)">P${r+1}</b>
+        <span style="flex:1;font-size:.8rem"><b style="color:var(--red)">${p.code}</b>
+          ${p.pts?` (+${p.pts} pt)`:""} <span style="color:var(--gray4)">${esc(CODES[p.code].desc)}</span></span>
+        <button onclick="clearPenalty(${r},'${esc(sail)}');closePenalty();openPenalty('${esc(sail)}')"
+          style="border:none;background:var(--gray2);color:var(--gray4);border-radius:50%;
+          width:24px;height:24px;cursor:pointer">&#10005;</button></div>`);
+  }
+
+  const ov = document.createElement("div");
+  ov.className = "confirm-overlay"; ov.id = "penalty-overlay";
+  ov.style.display = "flex";
+  ov.innerHTML = `<div class="confirm-box" style="max-width:420px">
+    <h3 style="color:var(--navy)">&#9878; Penalità — ${esc(sail)} ${esc(boat.name)}</h3>
+    <div style="text-align:left;margin:10px 0">
+      <label style="font-size:.7rem;font-weight:700;color:var(--gray4);text-transform:uppercase">Prova</label>
+      <select id="pen-race" style="width:100%;padding:9px;margin:4px 0 10px;border:2px solid var(--gray2);
+        border-radius:var(--r);font-size:.95rem">${raceOpts.join("")}</select>
+      <label style="font-size:.7rem;font-weight:700;color:var(--gray4);text-transform:uppercase">Codice RRS</label>
+      <select id="pen-code" onchange="document.getElementById('pen-pts-wrap').style.display=
+        (this.value==='DPI'||this.value==='RDG')?'block':'none'"
+        style="width:100%;padding:9px;margin:4px 0 10px;border:2px solid var(--gray2);
+        border-radius:var(--r);font-size:.95rem">${codeOpts}</select>
+      <div id="pen-pts-wrap" style="display:none">
+        <label style="font-size:.7rem;font-weight:700;color:var(--gray4);text-transform:uppercase">Punti</label>
+        <input id="pen-pts" type="number" step="0.1" value="0"
+          style="width:100%;padding:9px;margin:4px 0 10px;border:2px solid var(--gray2);
+          border-radius:var(--r);font-size:.95rem">
+        <div style="font-size:.7rem;color:var(--gray4);margin-bottom:8px">
+          DPI: punti aggiunti al piazzamento (RRS E7) &middot; RDG: punteggio assegnato per riparazione</div>
+      </div>
+      ${attive.length?`<div style="font-size:.7rem;font-weight:700;color:var(--gray4);
+        text-transform:uppercase;margin-top:6px">Penalità attive</div>${attive.join("")}`:""}
+    </div>
+    <div class="confirm-btns">
+      <button class="btn btn-outline" onclick="closePenalty()">Chiudi</button>
+      <button class="btn btn-red" onclick="savePenalty('${esc(sail)}')">Applica</button>
+    </div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+function closePenalty() {
+  const el = document.getElementById("penalty-overlay");
+  if(el) el.remove();
+}
+
+function savePenalty(sail) {
+  const r    = parseInt(document.getElementById("pen-race").value);
+  const code = document.getElementById("pen-code").value;
+  const pts  = parseFloat(document.getElementById("pen-pts").value)||0;
+  closePenalty();
+  setPenalty(r, sail, code, pts);
+  showToast(`${code} applicata a ${sail} — Prova ${r+1}`, true);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// COPIA CLASSIFICA NEGLI APPUNTI
+// ══════════════════════════════════════════════════════════════════════
+function copyStandings() {
+  const isMulti = state.config.fleet==="multi";
+  const fleets  = isMulti ? ["A","B"] : ["A"];
+  const n_played = state.races.filter(r=>(r.finishes_a||[]).length>0).length;
+  let text = "";
+
+  text += `REGATA: ${state.config.name}\n`;
+  text += `DATA: ${state.config.date}\n`;
+  text += `PROVE: ${n_played}/${state.config.races} · SCARTI: ${getDiscards(n_played)}\n`;
+  text += `Sistema: Low Point — RRS Appendice A\n`;
+  text += "=".repeat(52)+"\n\n";
+
+  fleets.forEach(fl=>{
+    const boats = isMulti ? getBoatsByFleet(fl) : state.boats;
+    const results = boats.map(b=>({boat:b,...calcScore(b,fl)}))
+      .filter(r=>r.n_played>0)
+      .sort((a,b)=>{
+        if(a.net!==b.net) return a.net-b.net;
+        for(let r=state.config.races-1;r>=0;r--){
+          const sa=a.scores[r],sb=b.scores[r];
+          if(sa===null&&sb===null) continue;
+          if(sa===null) return 1; if(sb===null) return -1;
+          if(sa!==sb) return sa-sb;
+        } return 0;
+      });
+
+    if(isMulti) text += `FLOTTA ${fl}\n`+"─".repeat(52)+"\n";
+    text += `POS  VELICO  NOME                       LORDI  SC  NETTI\n`;
+    text += "─".repeat(52)+"\n";
+    results.forEach((r,i)=>{
+      const pos  = String(i+1).padEnd(5);
+      const sail = r.boat.sail.padEnd(7);
+      const name = r.boat.name.padEnd(27).slice(0,27);
+      const g    = String(Number.isInteger(r.gross)?r.gross:r.gross.toFixed(1)).padStart(5);
+      const d    = String(Number.isInteger(r.disc)?r.disc:r.disc.toFixed(1)).padStart(3);
+      const n    = String(Number.isInteger(r.net)?r.net:r.net.toFixed(1)).padStart(5);
+      const tie  = results.filter(x=>x.net===r.net).length>1?" *":"";
+      text += `${pos}${sail}${name}${g} ${d}${n}${tie}\n`;
+    });
+    text += "\n";
+    if(results.some(r=>results.filter(x=>x.net===r.net).length>1))
+      text += "* Parità risolta per RRS A8 (ultima prova)\n\n";
+  });
+
+  text += `Generato da RC Sails Scoring — Punteggio Minimo RRS App. A`;
+
+  // Copia negli appunti
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(text).then(()=>{
+      showToast("📋 Classifica copiata negli appunti!", true);
+    }).catch(()=>fallbackCopy(text));
+  } else {
+    fallbackCopy(text);
+  }
+}
+
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.cssText="position:fixed;top:-9999px;opacity:0";
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand("copy"); showToast("📋 Copiata negli appunti!", true); }
+  catch(e){ showToast("Copia non supportata — usa Esporta Excel"); }
+  ta.remove();
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// TRASFERIMENTO A CAMPIONATO
+// ══════════════════════════════════════════════════════════════════════
+function buildTransferPayload() {
+  const isMulti = state.config.fleet === "multi";
+  const fleets  = isMulti ? ["A","B"] : ["A"];
+  const results = [];
+
+  fleets.forEach(fl => {
+    const boats = getBoatsByFleet(fl);
+    boats.forEach(boat => {
+      const res = calcScore(boat, fl);
+      if(res.n_played === 0) return;
+
+      // Posizione nell'ultima prova disputata (per tiebreaker campionato)
+      let lastRacePos = null;
+      let lastRaceIdx = -1;
+      for(let r = state.config.races-1; r >= 0; r--) {
+        const race = state.races[r] || {};
+        const fin  = isMulti ? (fl==="A"?race.finishes_a:race.finishes_b) : race.finishes_a;
+        if(fin && fin.length > 0) { lastRaceIdx = r; break; }
+      }
+      if(lastRaceIdx >= 0) {
+        const race = state.races[lastRaceIdx];
+        const fin  = isMulti ? (fl==="A"?race.finishes_a:race.finishes_b) : race.finishes_a;
+        const pos  = (fin||[]).indexOf(boat.sail);
+        lastRacePos = pos >= 0 ? pos+1 : (fin||[]).length + 1; // assente = DNS
+      }
+
+      results.push({
+        sail:       boat.sail,
+        name:       boat.name,
+        fleet:      fl,
+        net:        res.net,
+        gross:      res.gross,
+        disc:       res.disc,
+        n_played:   res.n_played,
+        last_race_pos: lastRacePos
+      });
+    });
+  });
+
+  return {
+    type:     "grcs_regata_v1",
+    name:     state.config.name,
+    date:     state.config.date,
+    races:    state.config.races,
+    n_played: state.races.filter(r=>(r.finishes_a||[]).length>0).length,
+    fleet:    state.config.fleet,
+    results,
+    protests: (state.protests||[]).map(p=>({
+      raceIdx: p.raceIdx,
+      from:    p.from,
+      to:      p.to,
+      rule:    p.rule||"",
+      outcome: p.outcome,
+      notes:   p.notes||""
+    }))
+  };
+}
+
+function sendToCampionato() {
+  if(!state.boats.length){ toast("⚠ Nessun partecipante"); return; }
+  const payload = buildTransferPayload();
+  if(!payload.results.length){ toast("⚠ Nessun risultato da inviare"); return; }
+  const json = JSON.stringify(payload);
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(json).then(() => {
+      showToast("📤 Dati copiati! Apri GRCS_CAMPIONATO e premi 'Incolla da Regata'", true);
+    }).catch(() => fallbackCopy(json));
+  } else {
+    fallbackCopy(json);
+    showToast("📤 Dati copiati negli appunti!", true);
+  }
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// GESTIONE PROTESTE
+// ══════════════════════════════════════════════════════════════════════
+// state.protests = [{id, raceIdx, sail, outcome:"pending"|"dsq"|"dismissed", notes}]
+
+function openProtests() {
+  if(!state.boats.length){ showToast("\u26A0 Nessun partecipante"); return; }
+  const played=[];
+  for(let i=0;i<state.config.races;i++){
+    if((state.races[i]?.finishes_a||[]).length>0) played.push(i);
+  }
+  const useR=played.length?played:Array.from({length:state.config.races},(_,i)=>i);
+  const raceSel=document.getElementById("p-race-sel");
+  if(raceSel) raceSel.innerHTML=useR.map(i=>"<option value='"+i+"'>Prova "+(i+1)+"</option>").join("");
+  const opts=state.boats.map(b=>"<option value='"+b.sail+"'>"+b.sail+" — "+b.name+"</option>").join("");
+  const fromSel=document.getElementById("p-sail-from");
+  const toSel=document.getElementById("p-sail-to");
+  if(fromSel) fromSel.innerHTML=opts;
+  if(toSel) toSel.innerHTML=opts;
+  const ruleSel=document.getElementById("p-rule-sel");
+  if(ruleSel) ruleSel.innerHTML="<option value=''>— Seleziona regola —</option><option value='RRS 10'>RRS 10 — Dritta/Sinistra</option><option value='RRS 11'>RRS 11 — Sopravento/Sottovento</option><option value='RRS 12'>RRS 12 — Stessa amura in rotta</option><option value='RRS 13'>RRS 13 — Durante virata</option><option value='RRS 14'>RRS 14 — Evitare contatto</option><option value='RRS 15'>RRS 15 — Acquistando diritto</option><option value='RRS 16'>RRS 16 — Cambiando rotta</option><option value='RRS 17'>RRS 17 — Stesso bordo sovrapposte</option><option value='RRS 18'>RRS 18 — Spazio alla boa</option><option value='RRS 19'>RRS 19 — Spazio all ostacolo</option><option value='RRS 20'>RRS 20 — Richiesta spazio virare</option><option value='RRS 21'>RRS 21 — Barche che fanno penitenza</option><option value='RRS 31'>RRS 31 — Toccare una marca</option><option value='RRS 42'>RRS 42 — Propulsione</option><option value='RRS 60'>RRS 60 — Diritto di protestare</option><option value='ALTRO'>Altra regola</option>";
+  renderProtestListModal();
+  const modal=document.getElementById("protest-modal");
+  if(modal) modal.style.display="flex";
+}
+function closeProtests() {
+  document.getElementById("protest-modal").style.display="none";
+  renderProtestSummary();
+  renderStandings();
+  if(document.getElementById("page-race").classList.contains("active"))
+    renderCurrentRace();
+}
+
+function addProtest() {
+  const raceIdx  = parseInt(document.getElementById("p-race-sel").value);
+  const from     = document.getElementById("p-sail-from").value;
+  const to       = document.getElementById("p-sail-to").value;
+  const rule     = document.getElementById("p-rule-sel").value;
+  const outcome  = document.getElementById("p-outcome-sel").value;
+  const notes    = (document.getElementById("p-notes-inp").value||"").trim();
+
+  if(!from||!to)   { showToast("⚠ Seleziona protestante e protestato"); return; }
+  if(from===to)    { showToast("⚠ Le due barche devono essere diverse"); return; }
+
+  if(!state.protests) state.protests=[];
+  state.protests.push({id:Date.now()+"", raceIdx, from, to, rule, outcome, notes});
+
+  if(outcome==="dsq") setPenalty(raceIdx, to, "DSQ", 0, "protesta accolta");
+
+  document.getElementById("p-notes-inp").value="";
+  saveState();
+  renderProtestListModal();
+  renderStandings();
+  if(document.getElementById("page-race").classList.contains("active")) renderCurrentRace();
+  showToast(outcome==="pending"
+    ? "⏳ Protesta P"+(raceIdx+1)+": "+from+" → "+to
+    : "✅ Esito P"+(raceIdx+1)+": "+to);
+}
+
+function removeProtest(id) {
+  const p=(state.protests||[]).find(x=>x.id===id);
+  if(p && p.outcome==="dsq") {
+    const cur=getPenalty(p.raceIdx, p.to);
+    if(cur && cur.code==="DSQ") clearPenalty(p.raceIdx, p.to);
+  }
+  state.protests=(state.protests||[]).filter(p=>p.id!==id);
+  saveState(); renderProtestListModal();
+}
+
+function renderProtestListModal() {
+  const el=document.getElementById("protest-list-modal");
+  if(!el)return;
+  const prots=state.protests||[];
+  if(!prots.length){
+    el.innerHTML='<p style="color:var(--gray3,#B0BAD0);text-align:center;font-size:.85rem;padding:8px">Nessuna protesta registrata</p>';
+    return;
+  }
+  const OI={"pending":"⏳","dsq":"🔴","dismissed":"✅",};
+  const OL={"pending":"In attesa","dsq":"DSQ","dismissed":"Respinta",};
+  const byRace={};
+  prots.forEach(p=>{if(!byRace[p.raceIdx])byRace[p.raceIdx]=[];byRace[p.raceIdx].push(p);});
+  el.innerHTML=Object.keys(byRace).sort((a,b)=>+a-+b).map(ri=>`
+    <div style="margin-bottom:12px">
+      <div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.8rem;
+        color:var(--navy);padding:5px 0;border-bottom:2px solid var(--lblue,#D6E4F7);margin-bottom:6px">
+        Prova ${+ri+1}</div>
+      ${byRace[ri].map(p=>{
+        const bF=state.boats.find(b=>b.sail===p.from);
+        const bT=state.boats.find(b=>b.sail===p.to);
+        return `<div style="display:flex;align-items:flex-start;gap:8px;padding:8px 0;border-bottom:1px solid var(--gray2,#E8ECF4)">
+          <div style="flex:1;font-size:.82rem">
+            <b>${p.from}</b>${bF?" "+bF.name:""} →
+            <b style="color:var(--red)">${p.to}</b>${bT?" "+bT.name:""}
+            ${p.rule?`<span style="display:block;color:var(--blue,#2563A8);font-size:.72rem">${p.rule}</span>`:""}
+            ${p.notes?`<span style="display:block;color:var(--dark);font-size:.75rem">${p.notes}</span>`:""}
+          </div>
+          <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+            <select onchange="updateProtestOutcome('${p.id}',this.value)"
+              style="padding:5px 8px;border:1.5px solid var(--gray2,#E4E8F2);border-radius:var(--r);
+              font-size:.78rem;outline:none;-webkit-appearance:none;background:#fff;max-width:130px">
+              ${["pending","dsq","dismissed"].map(o=>
+                `<option value="${o}" ${p.outcome===o?"selected":""}>${OI[o]} ${OL[o]}</option>`
+              ).join("")}
+            </select>
+            <button onclick="removeProtest('${p.id}')"
+              style="width:26px;height:26px;border-radius:50%;border:none;
+              background:var(--gray2,#E8ECF4);color:var(--gray4);cursor:pointer;font-size:.8rem">✕</button>
+          </div>
+        </div>`;
+      }).join("")}
+    </div>`).join("");
+}
+
+function renderProtestSummary() { /* rimossa — usare renderProtestTable */ }
+function openProtestsForRace(raceIdx) {
+  openProtests();
+  const sel=document.getElementById("p-race-sel");
+  if(sel) sel.value=raceIdx;
+}
+
+function updateProtestOutcome(id,newOutcome) {
+  const p=(state.protests||[]).find(x=>x.id===id);
+  if(!p)return;
+  const old=p.outcome;
+  p.outcome=newOutcome;
+  // Reversibile in entrambi i sensi
+  if(newOutcome==="dsq" && old!=="dsq") setPenalty(p.raceIdx, p.to, "DSQ", 0, "protesta accolta");
+  if(newOutcome!=="dsq" && old==="dsq") {
+    const cur = getPenalty(p.raceIdx, p.to);
+    if(cur && cur.code==="DSQ") clearPenalty(p.raceIdx, p.to);
+  }
+  saveState();
+  renderProtestListModal();
+  renderStandings();
+  if(document.getElementById("page-race").classList.contains("active"))
+    renderCurrentRace();
+}
+
+function getProtestDot(sail) {
+  const pending=(state.protests||[]).filter(p=>p.to===sail&&p.outcome==="pending");
+  if(!pending.length) return "";
+  const races=pending.map(p=>"P"+(p.raceIdx+1)).join(", ");
+  return `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;` +
+    `background:var(--red);margin-left:3px;vertical-align:middle"` +
+    ` title="Protestato in ${races}"></span>`;
+}
+
+function renderProtestTable() {
+  const el=document.getElementById("protest-table-section");
+  if(!el)return;
+  const prots=state.protests||[];
+  if(!prots.length){el.style.display="none";return;}
+  el.style.display="block";
+  const OI={"pending":"⏳","dsq":"🔴","dismissed":"✅",};
+  const OL={"pending":"In attesa","dsq":"DSQ accolto","dismissed":"Respinta",};
+  const sorted=[...prots].sort((a,b)=>a.raceIdx-b.raceIdx);
+  el.innerHTML=`<div style="font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:.85rem;
+      color:var(--navy);text-transform:uppercase;letter-spacing:.08em;
+      padding:14px 0 8px;border-top:2px solid var(--lblue,#D6E4F7);margin-top:4px">⚖️ Proteste</div>
+    <table style="width:100%;border-collapse:collapse;font-size:.82rem">
+      <thead><tr style="background:var(--navy)">
+        <th style="padding:7px 8px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.73rem;text-align:center">Prova</th>
+        <th style="padding:7px 8px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.73rem">Protestante</th>
+        <th style="padding:7px 8px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.73rem">Protestato</th>
+        <th style="padding:7px 8px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.73rem">Regola</th>
+        <th style="padding:7px 8px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:.73rem;text-align:center">Esito</th>
+      </tr></thead>
+      <tbody>${sorted.map(p=>{
+        const bF=state.boats.find(b=>b.sail===p.from);
+        const bT=state.boats.find(b=>b.sail===p.to);
+        const bg=p.outcome==="dsq"?"#FFF0F0":p.outcome==="dismissed"?"#F0FFF4":"#FFF";
+        return `<tr style="background:${bg}">
+          <td style="padding:7px 8px;font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--navy);text-align:center;border-bottom:1px solid var(--gray2,#E4E8F2)">P${p.raceIdx+1}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid var(--gray2,#E4E8F2)"><b>${p.from}</b>${bF?" "+bF.name:""}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid var(--gray2,#E4E8F2);color:var(--red)"><b>${p.to}</b>${bT?" "+bT.name:""}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid var(--gray2,#E4E8F2);font-size:.75rem;color:var(--blue,#2563A8)">${p.rule||"—"}</td>
+          <td style="padding:7px 8px;border-bottom:1px solid var(--gray2,#E4E8F2);text-align:center;white-space:nowrap">${OI[p.outcome]} ${OL[p.outcome]}</td>
+        </tr>`;
+      }).join("")}</tbody>
+    </table>`;
+}
+
+
+// ══════════════════════════════════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════════════════════════════════
+
+function importFromXlsx(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const wb = XLSX.read(e.target.result, {type:"array"});
+      if(!wb.SheetNames.includes("ARRIVI")){ showToast("\u26A0 Foglio ARRIVI non trovato"); return; }
+      const rows = XLSX.utils.sheet_to_json(wb.Sheets["ARRIVI"], {header:1, defval:""});
+      if(!rows||rows.length<2){ showToast("\u26A0 File Excel vuoto"); return; }
+      const hdr = rows[0].map(h=>String(h||"").trim().toUpperCase());
+      const si=hdr.indexOf("VELICO"), ni=hdr.indexOf("NOME"), fi=hdr.indexOf("FLOTTA");
+      const rc=[];
+      hdr.forEach((h,i)=>{ if(/^P\d+$/.test(h)) rc.push({col:i,num:parseInt(h.slice(1))-1}); });
+      rc.sort((a,b)=>a.num-b.num);
+      if(si<0||!rc.length){ showToast("\u26A0 Struttura Excel non riconosciuta"); return; }
+      const br=rows.slice(1).filter(r=>r[si]&&String(r[si]).trim());
+      if(!br.length){ showToast("\u26A0 Nessuna barca trovata"); return; }
+      const fls=new Set();
+      if(fi>=0) br.forEach(r=>{const f=String(r[fi]||"").trim();if(f)fls.add(f);});
+      const isMulti=fls.size>1;
+      const N_total=br.length;  // DNS = N_totale + 1 (posizioni assolute)
+
+      state.boats=br.map(r=>({
+        sail:String(r[si]).trim(), name:String(r[ni]||r[si]).trim(),
+        fleet:fi>=0?String(r[fi]||"A").trim():"A", id:String(r[si]).trim()
+      }));
+
+      // Il foglio ARRIVI contiene POSIZIONI ASSOLUTE su tutti i partecipanti
+      // (non per flotta). Ricostruiamo finishes_a con tutte le barche in ordine
+      // e lasciamo finishes_b vuoto — il calcolo usa N_totale+1 per DNS.
+      state.races=rc.map(({col})=>{
+        const entries=[];
+        br.forEach(row=>{
+          const pos=parseInt(String(row[col]||"").trim());
+          if(!isNaN(pos)&&pos>0) entries.push({pos,sail:String(row[si]).trim()});
+        });
+        entries.sort((a,b)=>a.pos-b.pos);
+        return {finishes_a:entries.map(e=>e.sail), finishes_b:[]};
+      });
+
+      // Metadati da CLASSIFICA
+      let rName="", rDate="";
+      if(wb.SheetNames.includes("CLASSIFICA")){
+        XLSX.utils.sheet_to_json(wb.Sheets["CLASSIFICA"],{header:1,defval:""}).forEach(row=>
+          row.forEach(cell=>{const c=String(cell||"");
+            if(c.startsWith("Regata:")) rName=c.replace("Regata:","").trim();
+            if(c.startsWith("Data:"))   rDate=c.replace("Data:","").trim();
+          }));
+      }
+
+      state.config.races=rc.length;
+      // Mantieni la modalità flotta come impostata — le barche hanno il campo fleet
+      // per la visualizzazione separata ma il calcolo è globale
+      if(isMulti) state.config.fleet="multi"; else state.config.fleet="single";
+      state.useJudge=false; state.protests=[]; state.overrides={};
+      if(rName) state.config.name=rName;
+      if(rDate) state.config.date=rDate;
+
+      saveState(); syncUI();
+      const proved=state.races.filter(r=>r.finishes_a.length>0).length;
+      const prev=document.getElementById("import-xl-preview");
+      if(prev) prev.innerHTML="<div style=\"background:#E2F5EA;border-left:4px solid #27AE60;border-radius:8px;padding:10px 14px;font-size:.82rem\">\u2705 <strong>"+state.boats.length+" barche</strong> \u2014 "+proved+"/"+rc.length+" prove \u2014 "+(isMulti?"FL.A+B":"Flotta unica")+"<br><em>"+(rName||"\u2014")+"</em> \xb7 <em>"+(rDate||"\u2014")+"</em></div>";
+      showToast("\u2705 Importati: "+state.boats.length+" barche, "+proved+" prove", true);
+    } catch(err){ showToast("\u274C Errore: "+err.message); console.error(err); }
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function newRegata() {
+  showConfirm(
+    "\uD83D\uDDD1\uFE0F Nuova Regata",
+    "Verranno cancellati: barche, arrivi, penalit\u00e0, proteste e giudici.\nViene mantenuta tutta la configurazione di evento e punteggio.",
+    function() {
+      // La configurazione è impostata una volta e sopravvive alle regate
+      const keep = Object.assign({}, state.config, {
+        date: new Date().toISOString().slice(0,10),
+        dateEnd: ""
+      });
+      keep.scoring = Object.assign({}, state.config.scoring);
+      state.boats=[]; state.races=[]; state.protests=[]; state.overrides={};
+      state.config=keep;
+      saveState(); syncUI();
+      const prev=document.getElementById("import-xl-preview");
+      if(prev) prev.innerHTML="";
+      const xl=document.getElementById("import-xl-inp");
+      if(xl) xl.value="";
+      showToast("\u2705 Pronto per una nuova regata", true);
+      navigate("setup");
+    }
+  );
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// ZFP — NOTE: La regola 30.2 (Z Flag Penalty) è stata ELIMINATA
+//       nelle RRS 2021-2024 e 2025-2028. La funzione è mantenuta
+//       solo per compatibilità con regate che usano regole locali.
+//       Non è applicabile nelle regate standard.
+// ZFP — Zero Flag Penalty (ELIMINATA da RRS 2021, solo uso locale)
+// Penalità: 20% del numero di imbarcazioni arrotondata all'intero più vicino
+// Non sostituisce il punteggio di arrivo ma viene aggiunto ad esso
+// ══════════════════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════════════
+// ANNULLAMENTO PROVA — la prova non conta per la serie
+// ══════════════════════════════════════════════════════════════════════
+function setStarters(raceIdx, val) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  race.starters = Math.max(0, parseInt(val)||0);
+  saveState(); renderStandings();
+}
+
+function cancelRace(raceIdx) {
+  const race = state.races[raceIdx];
+  if(!race) return;
+  const done = () => { saveState(); renderStandings(); renderCurrentRace(); };
+  if(race.cancelled) {
+    race.cancelled = false;
+    showToast("Prova " + (raceIdx+1) + " ripristinata", true);
+    done(); return;
+  }
+  showConfirm("Annulla Prova " + (raceIdx+1) + "?",
+    "La prova sarà marcata come non valida e non conterà per la classifica. Gli arrivi restano registrati.",
+    () => { race.cancelled = true; done();
+            showToast("Prova " + (raceIdx+1) + " annullata — non conta per la serie"); });
+}
+
+// NOTA — ZFP e SCP sono state rimosse.
+// L'Appendice E cancella la regola 30.2 (E3.8(a)) e la regola 44.3 (E4.1):
+// in vela radiocomandata non esistono né la Z Flag Penalty né la Penalità
+// a Punti. Le penalità a punti passano dalla regola E7, gestita come DPI
+// dal pannello Penalità.
+
+document.querySelectorAll("img.grcs-logo").forEach(el=>{ el.src = LOGO; });
+// ══════════════════════════════════════════════════════════════════════
+// DOCUMENTI UFFICIALI — classifica ed estratto delle Istruzioni di Regata
+//
+// Non si usa una libreria PDF: si costruisce un documento con CSS di
+// stampa e si affida la conversione al browser (Stampa → Salva come PDF).
+// Zero dipendenze, funziona offline, funziona anche su iOS.
+// ══════════════════════════════════════════════════════════════════════
+
+function dataOggi() {
+  const d = new Date();
+  return d.toLocaleDateString("it-IT", {day:"2-digit", month:"long", year:"numeric"})
+       + " alle " + d.toLocaleTimeString("it-IT", {hour:"2-digit", minute:"2-digit"});
+}
+
+function dataBreve(iso) {
+  if(!iso) return "";
+  const [a,m,g] = iso.split("-");
+  return `${g}/${m}/${a}`;
+}
+
+function periodoEvento() {
+  const c = state.config;
+  if(c.date && c.dateEnd && c.date!==c.dateEnd)
+    return `${dataBreve(c.date)} – ${dataBreve(c.dateEnd)}`;
+  return dataBreve(c.date);
+}
+
+// ── Descrizione a parole del sistema di punteggio in vigore ───────────
+function descrizionePunteggio() {
+  const sc = scoringCfg(), c = state.config, v = [];
+
+  v.push(["Sistema", "Punteggio Minimo, Appendice A delle RRS 2025-2028, "
+    + "come modificate dall'Appendice E per la vela radiocomandata."]);
+
+  let scarti;
+  switch(sc.discardMode) {
+    case "none":  scarti = "Nessun punteggio viene escluso dalla serie."; break;
+    case "one":   scarti = `Si esclude il peggior punteggio a partire da `
+                  + `${sc.discardAfter} prove valide.`; break;
+    case "every": scarti = `Si esclude un punteggio ogni ${sc.discardEvery} prove valide, `
+                  + `a partire da ${sc.discardAfter} prove.`; break;
+    default:      scarti = "Scarti progressivi: " + discardPreview() + ".";
+  }
+  scarti += " A parità di peggior punteggio si esclude la prova disputata per prima (RRS A2.1).";
+  v.push(["Scarti", scarti]);
+
+  v.push(["DNS · DNF · DSQ", sc.a53
+    ? "Punti del piazzamento pari a uno in più del numero di barche venute in area "
+      + "di partenza (RRS A5.3, invocata dal Bando). Il DNC è valutato su uno in più "
+      + "del numero di barche iscritte alla serie."
+    : "Punti del piazzamento pari a uno in più del numero di barche iscritte alla "
+      + "serie (RRS A5.2, disposizione predefinita)."]);
+
+  if(state.useJudge) {
+    const g = {
+      "avg-all":    "Media dei punteggi ottenuti in tutte le altre prove della serie, "
+                  + "arrotondata al decimo di punto con 0,05 per eccesso (criterio RRS A9(a)).",
+      "avg-before": "Media dei punteggi ottenuti nelle prove precedenti, arrotondata al "
+                  + "decimo di punto con 0,05 per eccesso (criterio RRS A9(b)).",
+      "none":       "Nessun punteggio: la prova non è conteggiata per la barca di turno."
+    }[sc.judgeScore] || "";
+    v.push(["Turno di giuria",
+      "A rotazione un iscritto svolge le funzioni di osservatore (RRS E5.1) e non "
+      + "prende parte alla prova. " + g + " Il trattamento della barca di turno non è "
+      + "previsto dalle RRS: è una disposizione del Bando."]);
+  }
+
+  v.push(["Parità", "Risolta secondo la RRS A8: prima confrontando i punteggi non "
+    + "esclusi dal migliore al peggiore, poi, se la parità permane, i punteggi "
+    + "dell'ultima prova a ritroso, scarti compresi."]);
+
+  v.push(["Validità della serie", `Sono richieste almeno ${c.minRaces} prove valide `
+    + `su ${c.races} programmate (RRS A1).`]);
+
+  v.push(["Penalità", "In vela radiocomandata la penalità in acqua è la Penalità di "
+    + "Un Giro (RRS E4.3). La Z Flag Penalty e la Penalità a Punti non si applicano: "
+    + "l'Appendice E cancella le regole 30.2 (E3.8(a)) e 44.3 (E4.1). Le penalità a "
+    + "punti sono comminate dal comitato per le proteste ai sensi della RRS E7 e "
+    + "registrate con il codice DPI."]);
+
+  return v;
+}
+
+// ── Intestazione comune ai documenti ─────────────────────────────────
+function intestazioneDoc(titolo) {
+  const c = state.config;
+  const cl = (c.classe && c.classe!=="ALTRA") ? esc(c.classe) : "";
+  return `<div class="doc-head">
+    <img src="${LOGO}" alt="" class="doc-logo" onerror="this.style.display='none'">
+    <div class="doc-head-txt">
+      <div class="doc-club">${esc(c.club||"")}${cl?` <span class="doc-cls">${cl}</span>`:""}</div>
+      <div class="doc-event">${esc(c.name||"")}</div>
+      <div class="doc-meta">${[esc(c.venue||""), periodoEvento()].filter(Boolean).join(" · ")}</div>
+    </div>
+    <div class="doc-title">${titolo}</div>
+  </div>`;
+}
+
+// ── Classifica ufficiale ─────────────────────────────────────────────
+function docClassifica() {
+  const isMulti = state.config.fleet==="multi";
+  const flotte  = isMulti ? ["A","B"] : ["A"];
+  const nRaces  = state.config.races;
+  let html = intestazioneDoc("Classifica");
+
+  flotte.forEach(fl => {
+    const barche  = isMulti ? getBoatsByFleet(fl) : state.boats;
+    if(!barche.length) return;
+    const valide  = countPlayed(fl);
+    const provvis = valide < (state.config.minRaces||1);
+
+    const ris = barche.map(b => ({boat:b, ...calcScore(b, fl)}))
+                      .sort(compareSeries);
+
+    // Solo le prove che esistono davvero, per non stampare colonne vuote
+    const colonne = [];
+    for(let r=0;r<nRaces;r++)
+      if(rawFinishes(r, fl).length || (state.races[r]&&state.races[r].cancelled)) colonne.push(r);
+
+    html += `<div class="doc-sec">
+      ${isMulti?`<h2>Flotta ${fl}</h2>`:""}
+      <div class="doc-status ${provvis?"prov":"def"}">
+        ${provvis
+          ? `CLASSIFICA PROVVISORIA — ${valide} prove valide su ${state.config.minRaces} richieste`
+          : `CLASSIFICA — ${valide} prove valide · ${getDiscards(valide)} scart${getDiscards(valide)===1?"o":"i"}`}
+      </div>`;
+
+    html += `<table class="doc-tab"><thead><tr>
+      <th class="c">Pos</th><th class="c">Velico</th><th>Skipper</th>
+      ${colonne.map(r=>`<th class="c">P${r+1}</th>`).join("")}
+      <th class="c">Lordi</th><th class="c">Sc.</th><th class="c">Netti</th>
+    </tr></thead><tbody>`;
+
+    const usati = new Set();
+    ris.forEach((r,i) => {
+      const celle = colonne.map(k => {
+        const s = r.scores[k], cod = r.codes[k];
+        if(state.races[k] && state.races[k].cancelled) return `<td class="c ann">ann.</td>`;
+        if(s===null) return `<td class="c">–</td>`;
+        const val = Number.isInteger(s) ? s : s.toFixed(1);
+        if(cod) usati.add(cod);
+        const tag = cod ? `<sup>${cod}</sup>` : "";
+        // Le parentesi quadre segnalano il punteggio escluso: convenzione
+        // usata da tutti i tabelloni ufficiali.
+        return r.discIndices.has(k)
+          ? `<td class="c sc">[${val}${tag}]</td>`
+          : `<td class="c">${val}${tag}</td>`;
+      }).join("");
+      const n = x => Number.isInteger(x) ? x : x.toFixed(1);
+      html += `<tr${i<3?' class="podio"':''}>
+        <td class="c b">${i+1}</td><td class="c b">${esc(r.boat.sail)}</td>
+        <td>${esc(r.boat.name)}</td>${celle}
+        <td class="c">${n(r.gross)}</td><td class="c">${n(r.disc)}</td>
+        <td class="c b">${n(r.net)}</td></tr>`;
+    });
+    html += `</tbody></table>`;
+
+    if(usati.size) {
+      const leg = [...usati].sort().map(c =>
+        c==="AVG" ? `<b>AVG</b> punteggio medio, turno di giuria`
+                  : `<b>${c}</b> ${esc(CODES[c] ? CODES[c].desc : c)}`);
+      html += `<div class="doc-note"><b>Codici:</b> ${leg.join(" · ")}<br>
+        <b>[ ]</b> punteggio escluso dalla serie</div>`;
+    }
+    html += `</div>`;
+  });
+
+  // ── Proteste ──────────────────────────────────────────────────────
+  const prot = state.protests||[];
+  if(prot.length) {
+    const et = {pending:"In attesa", dsq:"Accolta — DSQ", dismissed:"Respinta"};
+    html += `<div class="doc-sec"><h2>Proteste</h2>
+      <table class="doc-tab"><thead><tr>
+        <th class="c">Prova</th><th>Protestante</th><th>Protestato</th>
+        <th>Regola</th><th>Esito</th></tr></thead><tbody>
+      ${[...prot].sort((a,b)=>a.raceIdx-b.raceIdx).map(p=>`<tr>
+        <td class="c">P${p.raceIdx+1}</td>
+        <td>${esc(p.from)} ${esc(getBoatName(p.from))}</td>
+        <td>${esc(p.to)} ${esc(getBoatName(p.to))}</td>
+        <td>${esc(p.rule||"—")}</td>
+        <td>${et[p.outcome]||esc(p.outcome)}</td></tr>`).join("")}
+      </tbody></table></div>`;
+  }
+
+  // ── Prove annullate ───────────────────────────────────────────────
+  const ann = state.races.map((r,i)=>r&&r.cancelled?i+1:null).filter(Boolean);
+  if(ann.length)
+    html += `<div class="doc-note"><b>Prove annullate e non valide per la serie:</b>
+      ${ann.map(n=>"P"+n).join(", ")}</div>`;
+
+  html += pieDoc();
+  return html;
+}
+
+// ── Estratto delle Istruzioni di Regata ──────────────────────────────
+function docIstruzioni() {
+  let html = intestazioneDoc("Estratto delle<br>Istruzioni di Regata");
+  html += `<div class="doc-sec">
+    <div class="doc-status def">SISTEMA DI PUNTEGGIO IN VIGORE</div>
+    <table class="doc-tab doc-tab-def"><tbody>
+    ${descrizionePunteggio().map(([k,v])=>
+      `<tr><th class="k">${k}</th><td>${v}</td></tr>`).join("")}
+    </tbody></table>
+    <div class="doc-note">
+      Questo estratto è generato dai parametri impostati nell'applicazione e riguarda
+      il solo sistema di punteggio. Non sostituisce il Bando di Regata né le Istruzioni
+      di Regata, che restano i documenti di riferimento: in caso di discordanza
+      prevalgono questi ultimi.
+    </div>
+  </div>`;
+  html += pieDoc();
+  return html;
+}
+
+function pieDoc() {
+  const c = state.config;
+  return `<div class="doc-foot">
+    <div class="doc-firma">
+      <div>Il Comitato di Regata</div>
+      <div class="doc-nome">${esc(c.officer||"")}</div>
+      <div class="doc-riga"></div>
+    </div>
+    <div class="doc-gen">Documento generato il ${dataOggi()}<br>
+      RC Sails Scoring ${typeof APP_VERSION!=="undefined"?APP_VERSION:""}</div>
+  </div>`;
+}
+
+// ── Apertura della finestra di stampa ────────────────────────────────
+function stampaDoc(tipo) {
+  if(!state.boats.length) { showToast("Nessun partecipante inserito"); return; }
+  const area = document.getElementById("print-area");
+  area.innerHTML = (tipo==="idr") ? docIstruzioni() : docClassifica();
+  document.body.classList.add("printing");
+  // Il rendering deve completarsi prima della chiamata a print()
+  setTimeout(() => {
+    window.print();
+    setTimeout(()=>document.body.classList.remove("printing"), 400);
+  }, 120);
+}
+
+
+loadState();
+syncDiscardUI();
+applyBranding();
+
+// Ogni modifica nella schermata di configurazione viene registrata subito
+document.getElementById("page-setup").addEventListener("change", e=>{
+  if(e.target.id && e.target.id.indexOf("cfg-")===0) readConfig();
+});
+if(!state.protests) state.protests=[];
+syncUI();
+renderBoatList();
+navigate("setup");
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+<script>
+// ── Installazione e aggiornamenti ────────────────────────────────────
+const APP_VERSION = "15.5";
+
+if("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("sw.js");
+      // Una nuova versione è pronta: la si applica solo su conferma,
+      // per non interrompere una regata in corso.
+      reg.addEventListener("updatefound", () => {
+        const nuovo = reg.installing;
+        if(!nuovo) return;
+        nuovo.addEventListener("statechange", () => {
+          if(nuovo.state==="installed" && navigator.serviceWorker.controller)
+            mostraAggiornamento(reg);
+        });
+      });
+      setInterval(()=>reg.update(), 60*60*1000);
+    } catch(e) { console.warn("Service worker non registrato:", e); }
+  });
+  let ricaricato = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => {
+    if(ricaricato) return; ricaricato = true; location.reload();
+  });
+}
+
+function mostraAggiornamento(reg) {
+  const b = document.createElement("div");
+  b.style.cssText = "position:fixed;left:12px;right:12px;bottom:calc(var(--nav-h) + var(--safe-b) + 12px);"
+    + "background:var(--navy);color:#fff;border-radius:var(--rr);padding:14px 16px;z-index:900;"
+    + "box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:12px";
+  b.innerHTML = '<div style="flex:1;font-size:.85rem">'
+    + '<b style="font-family:\'Barlow Condensed\',sans-serif;font-size:1rem">Aggiornamento disponibile</b><br>'
+    + '<span style="color:var(--gray3)">I dati della regata restano salvati.</span></div>'
+    + '<button id="upd-now" class="btn btn-gold btn-sm">Aggiorna</button>'
+    + '<button id="upd-later" class="btn btn-sm" style="background:transparent;color:var(--gray3);'
+    + 'border:1px solid var(--gray4)">Dopo</button>';
+  document.body.appendChild(b);
+  b.querySelector("#upd-now").onclick = () => {
+    if(reg.waiting) reg.waiting.postMessage({type:"SKIP_WAITING"});
+    b.remove();
+  };
+  b.querySelector("#upd-later").onclick = () => b.remove();
+}
+
+// ── Persistenza dei dati ─────────────────────────────────────────────
+// Senza questa richiesta il browser può eliminare i risultati di regata
+// quando lo spazio scarseggia.
+(async () => {
+  try {
+    if(navigator.storage && navigator.storage.persist) {
+      const gia = await navigator.storage.persisted();
+      if(!gia) await navigator.storage.persist();
+    }
+  } catch(e) {}
+})();
+
+// ── Avviso di uscita a regata aperta ─────────────────────────────────
+window.addEventListener("beforeunload", e => {
+  const inCorso = state && state.races &&
+    state.races.some(r => (r.finishes_a||[]).length && !r.confirmed);
+  if(inCorso) { e.preventDefault(); e.returnValue = ""; }
+});
+</script>
+</body>
+</html>
