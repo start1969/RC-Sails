@@ -1,3 +1,4 @@
+// RC Sails Scoring — Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
 const E = require('./motore.js');
 const out = [];
 const T = (id, desc, ok, note) => out.push({ id, desc, ok, note });

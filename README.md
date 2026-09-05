@@ -1,4 +1,6 @@
-# RC Sails Scoring — v15.7
+# RC Sails Scoring — v15.8
+
+**Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
 Applicazione per il calcolo dei punteggi di regata nella vela radiocomandata,
 conforme alle **RRS 2025-2028** (Appendice A) e all'**Appendice E**.
@@ -23,8 +25,11 @@ rc-sails/
 │   ├── icon-512.png              icona standard
 │   ├── icon-maskable-512.png     icona adattiva Android
 │   └── apple-touch-icon.png      icona schermata Home iOS
+├── LICENSE                       licenza d'uso — tutti i diritti riservati
+├── THIRD-PARTY-NOTICES.md        componenti di terze parti
 ├── vendor/
-│   └── xlsx.mini.min.js          libreria per l'export Excel (SheetJS)
+│   ├── xlsx.mini.min.js          libreria per l'export Excel (SheetJS)
+│   └── LICENSE-Apache-2.0.txt    licenza della libreria SheetJS
 └── test/
     ├── regressione.js            22 casi di verifica del motore
     └── motore.js                 motore estratto da index.html
@@ -86,7 +91,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.7` a `rcsails-15.8`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.8` a `rcsails-15.9`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -151,3 +156,39 @@ generale**: vanno verificati per ogni manifestazione.
 - **Export Excel**: foglio ARRIVI da rivedere, contiene codice residuo.
 - **Esportazione PDF** dei risultati e dell'estratto delle Istruzioni di
   Regata: da realizzare.
+
+---
+
+## Licenza e proprietà intellettuale
+
+Tutti i diritti di proprietà intellettuale su **RC Sails Scoring** — codice,
+logica di calcolo, progetto grafico, interfaccia, impaginazione dei documenti
+generati e progettazione funzionale — appartengono in via esclusiva a
+**Stefano Ragusa**.
+
+L'applicazione può essere **usata liberamente e gratuitamente** per la
+gestione dei punteggi di regata. Sono invece vietati, senza autorizzazione
+scritta: la copia, la modifica, la ridistribuzione, la creazione di opere
+derivate, il riuso del progetto grafico e ogni impiego commerciale.
+
+Le condizioni complete sono nel file [`LICENSE`](LICENSE).
+
+Il repository è pubblico per rendere l'applicazione accessibile e installabile:
+questo **non** implica alcuna rinuncia ai diritti d'autore. La visibilità del
+codice non è una licenza d'uso sul codice.
+
+### Componenti di terze parti
+
+L'esportazione Excel utilizza **SheetJS Community Edition**, distribuita sotto
+Apache License 2.0. Il dettaglio e il testo della licenza sono in
+[`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
+
+Nessun carattere tipografico è incorporato: l'applicazione usa i caratteri già
+presenti sul dispositivo.
+
+### Esclusione di garanzia
+
+Il software è fornito "così com'è". Il titolare non garantisce che i punteggi
+calcolati siano esenti da errori né che corrispondano al Bando di Regata e alle
+Istruzioni di Regata di una specifica manifestazione. **La verifica dei
+risultati resta responsabilità del Comitato di Regata.**

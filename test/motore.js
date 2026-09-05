@@ -1,3 +1,4 @@
+// RC Sails Scoring — Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
 // Estratto automaticamente da index.html — non modificare a mano.
 function saveState(){}
 function renderStandings(){}

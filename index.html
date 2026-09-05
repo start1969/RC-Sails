@@ -1,9 +1,27 @@
 <!DOCTYPE html>
+<!--
+  ══════════════════════════════════════════════════════════════════════
+  RC SAILS SCORING
+  Calcolo dei punteggi di regata per vela radiocomandata
+  conforme alle RRS 2025-2028, Appendice A e Appendice E
+
+  Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
+
+  Codice, progetto grafico, interfaccia, logica di calcolo e
+  impaginazione dei documenti sono opera protetta dal diritto d'autore.
+  Riproduzione, modifica e distribuzione sono vietate senza
+  autorizzazione scritta del titolare. Vedere il file LICENSE.
+
+  Componenti di terze parti: vedere THIRD-PARTY-NOTICES.md
+  ══════════════════════════════════════════════════════════════════════
+-->
 <html lang="it">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#1B3A6B">
+<meta name="author" content="Stefano Ragusa">
+<meta name="copyright" content="© 2026 Stefano Ragusa — Tutti i diritti riservati">
 <meta name="description" content="Calcolo punteggi di regata per vela radiocomandata secondo le RRS 2025-2028.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="assets/icon-192.png" sizes="192x192">
@@ -709,6 +727,24 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div class="hint">
           Genera una pagina che descrive il sistema di punteggio impostato, con i
           riferimenti di regola. Da affiggere insieme alla classifica.
+        </div>
+
+        <div class="sub-head">Informazioni</div>
+        <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
+          <b style="color:var(--navy);font-family:var(--font-display);
+             font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
+          <span id="app-ver" style="color:var(--gray3)">v15.8</span><br>
+          Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
+          <span style="display:block;margin-top:6px">
+            &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
+            Codice, grafica e progettazione sono opera protetta dal diritto
+            d'autore. Riproduzione e distribuzione vietate senza
+            autorizzazione scritta.
+          </span>
+          <span style="display:block;margin-top:6px;color:var(--gray3)">
+            Include SheetJS CE (Apache 2.0) per l'esportazione Excel.<br>
+            Nessun dato lascia questo dispositivo.
+          </span>
         </div>
 
         <div class="sub-head">Azzeramento</div>
@@ -3271,7 +3307,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.7";
+const APP_VERSION = "15.8";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {

@@ -1,12 +1,14 @@
 /* ══════════════════════════════════════════════════════════════════════
    RC Sails Scoring — Service Worker
+   Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
+   Vedere il file LICENSE.
    Strategia: cache-first su un insieme di risorse precaricate.
    L'applicazione non fa chiamate di rete durante l'uso: una volta
    installata funziona integralmente senza connessione, che è la
    condizione normale su un campo di regata.
    ══════════════════════════════════════════════════════════════════════ */
 
-const VERSIONE = 'rcsails-15.7';
+const VERSIONE = 'rcsails-15.8';
 const CACHE    = `rcsails-scoring-${VERSIONE}`;
 
 // Tutto ciò che serve per funzionare offline.

@@ -1,0 +1,155 @@
+RC SAILS SCORING
+Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
+All rights reserved.
+
+════════════════════════════════════════════════════════════════════════
+ITALIANO
+════════════════════════════════════════════════════════════════════════
+
+1. TITOLARITÀ
+
+   Tutti i diritti di proprietà intellettuale relativi a RC Sails Scoring
+   (di seguito "il Software") appartengono in via esclusiva a Stefano
+   Ragusa (di seguito "il Titolare"), ivi compresi senza limitazione:
+
+   a) il codice sorgente e il codice eseguibile, la struttura, la logica
+      di calcolo e l'architettura del Software;
+   b) il progetto grafico, l'interfaccia utente, la scelta cromatica e
+      tipografica, l'impaginazione dei documenti generati e ogni altro
+      elemento visivo;
+   c) la progettazione funzionale, l'organizzazione dei contenuti, la
+      documentazione, i testi e i marchi eventualmente utilizzati;
+   d) ogni opera derivata, adattamento, traduzione o revisione del
+      Software.
+
+   Il Software è protetto dalla Legge 22 aprile 1941 n. 633 sul diritto
+   d'autore, dal D.Lgs. 29 dicembre 1992 n. 518 sulla tutela giuridica dei
+   programmi per elaboratore, dal Codice della Proprietà Industriale
+   (D.Lgs. 30/2005) e dalle convenzioni internazionali applicabili.
+
+2. LICENZA D'USO CONCESSA
+
+   Il Titolare concede a chiunque acceda al Software una licenza gratuita,
+   non esclusiva, non trasferibile e revocabile, limitata al solo utilizzo
+   dell'applicazione così come pubblicata, per la gestione dei punteggi di
+   regata.
+
+3. LIMITAZIONI
+
+   Salvo previa autorizzazione scritta del Titolare, è espressamente
+   vietato:
+
+   a) copiare, riprodurre, duplicare o ripubblicare il Software o sue
+      parti, in qualsiasi forma e con qualsiasi mezzo;
+   b) modificare, adattare, tradurre, decompilare o creare opere derivate;
+   c) distribuire, cedere, concedere in sublicenza, noleggiare, vendere o
+      rendere altrimenti disponibile a terzi il Software;
+   d) rimuovere, alterare o occultare le indicazioni di titolarità, le
+      note di copyright o i riferimenti alla presente licenza;
+   e) utilizzare il progetto grafico, l'impaginazione o gli elementi
+      visivi del Software in opere diverse;
+   f) impiegare il Software o sue parti per finalità commerciali.
+
+   Restano salve le facoltà inderogabili riconosciute all'utente legittimo
+   dagli articoli 64-ter e 64-quater della Legge 633/1941.
+
+4. COMPONENTI DI TERZE PARTI
+
+   Il Software incorpora componenti di terze parti soggetti a licenze
+   proprie, elencati nel file THIRD-PARTY-NOTICES.md. Le limitazioni di
+   cui al punto 3 non si applicano a tali componenti, che restano regolati
+   dalle rispettive licenze.
+
+5. ASSENZA DI GARANZIA
+
+   Il Software è fornito "così com'è", senza garanzia di alcun tipo,
+   espressa o implicita, inclusa senza limitazione la garanzia di
+   commerciabilità, idoneità a uno scopo particolare e assenza di
+   violazioni.
+
+   In particolare il Titolare non garantisce che i punteggi calcolati
+   siano esenti da errori né che corrispondano alle disposizioni del Bando
+   di Regata e delle Istruzioni di Regata di una specifica manifestazione.
+   La verifica dei risultati resta responsabilità esclusiva del Comitato
+   di Regata.
+
+6. LIMITAZIONE DI RESPONSABILITÀ
+
+   Il Titolare non risponde di alcun danno diretto, indiretto, incidentale
+   o consequenziale derivante dall'uso o dall'impossibilità di uso del
+   Software, ivi compresi la perdita di dati, l'errata classificazione di
+   una regata e ogni conseguenza sportiva o economica che ne derivi.
+
+7. TRATTAMENTO DEI DATI
+
+   Il Software non trasmette dati ad alcun server. Tutte le informazioni
+   inserite restano sul dispositivo dell'utente. Il Titolare non raccoglie,
+   né tratta, né ha accesso ad alcun dato personale degli utilizzatori.
+
+8. LEGGE APPLICABILE
+
+   La presente licenza è regolata dalla legge italiana. Per ogni
+   controversia è competente il foro del luogo di residenza del Titolare,
+   salvo diversa competenza inderogabile.
+
+9. CONTATTI
+
+   Per richieste di autorizzazione, licenze d'uso estese o segnalazioni:
+   https://github.com/start1969/RC-Sails
+
+════════════════════════════════════════════════════════════════════════
+ENGLISH (courtesy translation — the Italian text prevails)
+════════════════════════════════════════════════════════════════════════
+
+1. OWNERSHIP
+
+   All intellectual property rights in RC Sails Scoring (the "Software")
+   are exclusively owned by Stefano Ragusa (the "Owner"), including
+   without limitation the source and object code, the scoring logic and
+   architecture, the graphic design, user interface, colour and
+   typographic choices, the layout of generated documents, the functional
+   design, documentation and any derivative work thereof.
+
+2. LICENCE GRANTED
+
+   The Owner grants any person accessing the Software a free,
+   non-exclusive, non-transferable and revocable licence, limited to using
+   the application as published, for the purpose of scoring sailing races.
+
+3. RESTRICTIONS
+
+   Except with the Owner's prior written consent, it is expressly
+   forbidden to copy, reproduce, republish, modify, adapt, translate,
+   decompile, create derivative works of, distribute, sublicense, rent or
+   sell the Software or any part of it; to remove or alter copyright
+   notices; to reuse its graphic design or visual elements in other works;
+   or to use the Software for commercial purposes.
+
+4. THIRD-PARTY COMPONENTS
+
+   The Software includes third-party components governed by their own
+   licences, listed in THIRD-PARTY-NOTICES.md. The restrictions in
+   section 3 do not apply to those components.
+
+5. NO WARRANTY
+
+   The Software is provided "AS IS", without warranty of any kind. The
+   Owner does not warrant that computed scores are free of errors or that
+   they match the Notice of Race and Sailing Instructions of any given
+   event. Verification of results remains the sole responsibility of the
+   Race Committee.
+
+6. LIMITATION OF LIABILITY
+
+   The Owner shall not be liable for any direct, indirect, incidental or
+   consequential damages arising from the use of or inability to use the
+   Software, including loss of data or incorrect race results.
+
+7. DATA
+
+   The Software transmits no data to any server. All information entered
+   remains on the user's device. The Owner collects no personal data.
+
+8. GOVERNING LAW
+
+   This licence is governed by Italian law.
