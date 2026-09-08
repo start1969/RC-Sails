@@ -29,6 +29,15 @@ class FakeCtx {
     n.frequency={setValueAtTime:()=>{}}; return n; }
 }
 window.AudioContext = FakeCtx;
+window.__parlato = [];
+// speechSynthesis non è scrivibile per assegnazione diretta
+Object.defineProperty(window, 'speechSynthesis', { configurable:true, writable:true, value:{
+  getVoices(){ return [{name:'Alice', lang:'it-IT'}, {name:'Daniel', lang:'en-GB'}]; },
+  speak(u){ if((u.text||'').trim()) window.__parlato.push({t:u.text, v:u.voice&&u.voice.name,
+    lang:u.lang, rate:u.rate, q:window.__orologio}); },
+  cancel(){}, onvoiceschanged:null
+}});
+window.SpeechSynthesisUtterance = function(t){ this.text=t; this.volume=1; this.rate=1; this.pitch=1; };
 window.webkitAudioContext = FakeCtx;
 `;
 
@@ -66,6 +75,7 @@ window.webkitAudioContext = FakeCtx;
   // ── Programmazione effettiva dei suoni ──────────────────────────────
   const sched = await pg.evaluate(() => {
     window.__suoni = []; window.__orologio = 100;
+    setVoce(false);            // qui si verifica la griglia dei TONI
     setDurataSeq(120);
     avviaSequenza();
     // istanti relativi alla partenza (negativi = prima del via)
@@ -75,16 +85,16 @@ window.webkitAudioContext = FakeCtx;
              totale: window.__suoni.length };
   });
   const attesi = [-120,-60,-50,-40,-30,-20,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1,0];
-  T('Ogni suono cade esattamente nell\'istante prescritto',
+  T('Ogni tono cade esattamente nell\'istante prescritto',
     JSON.stringify(sched.istanti) === JSON.stringify(attesi),
-    `${sched.istanti.length} istanti · ${sched.totale} oscillatori programmati`);
+    `${sched.istanti.length} istanti · ${sched.totale} oscillatori programmati (solo segnali)`);
   T('I suoni sono programmati in anticipo, non a colpi di timer',
     sched.totale >= 19,
     'tutti gli eventi accodati sull\'orologio audio in una sola volta');
 
   // ── Sequenza da un minuto ───────────────────────────────────────────
   const uno = await pg.evaluate(() => {
-    chiudiSequenza();
+    chiudiSequenza(); apriSequenza(); setVoce(true);
     const e = eventiSequenza(60);
     return { testi:e.filter(x=>x.testo).map(x=>x.s+':'+x.testo), sec:e.map(x=>x.s) };
   });
@@ -124,7 +134,7 @@ window.webkitAudioContext = FakeCtx;
   // ── Selettore a due sole durate ─────────────────────────────────────
   const sel = await pg.evaluate(() => {
     chiudiSequenza(); apriSequenza();
-    const opt = [...document.querySelectorAll('.seq-opt')];
+    const opt = [...document.querySelectorAll('#seq-opt-60, #seq-opt-120')];
     const stato = () => ({ attivo: opt.find(o=>o.classList.contains('active')).id,
       valore: document.getElementById('seq-durata').value,
       nota: document.getElementById('seq-nota').innerText });
@@ -145,6 +155,60 @@ window.webkitAudioContext = FakeCtx;
     sel.uno.valore === '60' && sel.due.valore === '120' &&
     /dichiarala nelle Istruzioni/.test(sel.uno.nota) && /E3.4/.test(sel.due.nota),
     'scegliendo 1 minuto avvisa che va dichiarato nelle IdR');
+
+  // ── Conteggio vocale ────────────────────────────────────────────────
+  const voce = await pg.evaluate(async () => {
+    chiudiSequenza(); apriSequenza();
+    setVoce(true); setDurataSeq(120);
+    window.__parlato = []; window.__suoni = []; window.__orologio = 0;
+    avviaSequenza();
+    const t0 = 0.5 + 120;
+    const avanza = async q => { window.__orologio = t0 - q;
+      await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))); };
+    // Si percorre la sequenza istante per istante
+    for(const q of [120,60,50,40,30,20,10,9,8,7,6,5,4,3,2,1,0,-0.5]) await avanza(q);
+    return { detto: window.__parlato.map(p=>p.t),
+      voce: window.__parlato[0] && window.__parlato[0].v,
+      lang: window.__parlato[0] && window.__parlato[0].lang,
+      toni: [...new Set(window.__suoni.map(s=>Math.round((s.t-t0)*100)/100))].sort((a,b)=>a-b) };
+  });
+  T('La voce scandisce i segnali e tutti i conteggi',
+    voce.detto.join(' ') === 'avviso preparatorio 50 40 30 20 10 9 8 7 6 5 4 3 2 1 via',
+    voce.detto.join(' · '));
+  T('Viene scelta una voce italiana se il dispositivo la offre',
+    voce.voce === 'Alice' && /^it/.test(voce.lang), `${voce.voce} (${voce.lang})`);
+  T('Con la voce attiva restano solo i toni ufficiali e la tromba',
+    JSON.stringify(voce.toni) === JSON.stringify([-120,-60,0]),
+    'toni a −120, −60 e 0: nessun beep sovrapposto al parlato');
+
+  // ── Solo segnali acustici ───────────────────────────────────────────
+  const soloSuoni = await pg.evaluate(() => {
+    chiudiSequenza(); apriSequenza();
+    setVoce(false); setDurataSeq(120);
+    window.__parlato = []; window.__suoni = []; window.__orologio = 0;
+    avviaSequenza();
+    const t0 = 0.5 + 120;
+    return { parlato: window.__parlato.length,
+      toni: [...new Set(window.__suoni.map(s=>Math.round((s.t-t0)*100)/100))].length };
+  });
+  T('Disattivando la voce tornano tutti i beep e nulla viene parlato',
+    soloSuoni.parlato === 0 && soloSuoni.toni === 17,
+    `${soloSuoni.toni} toni · ${soloSuoni.parlato} annunci vocali`);
+
+  // ── Precisione: la voce parte in anticipo sulla latenza ─────────────
+  const anticipo = await pg.evaluate(async () => {
+    chiudiSequenza(); apriSequenza();
+    setVoce(true); setDurataSeq(120);
+    window.__parlato = []; window.__orologio = 0;
+    avviaSequenza();
+    const t0 = 0.5 + 120;
+    // Ci si ferma poco prima dei 5 secondi: l'annuncio deve essere già partito
+    window.__orologio = t0 - 5.15;
+    await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    return window.__parlato.map(p=>p.t).slice(-1)[0];
+  });
+  T('Ogni numero è pronunciato in anticipo per compensare la latenza vocale',
+    anticipo === '5', `a 5,15 secondi dal via è già stato lanciato "${anticipo}"`);
 
   // ── Richiamo generale: due suoni ────────────────────────────────────
   const rg = await pg.evaluate(() => {

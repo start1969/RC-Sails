@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.16
+# RC Sails Scoring — v15.17
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -32,7 +32,7 @@ rc-sails/
 │   └── LICENSE-Apache-2.0.txt    licenza della libreria SheetJS
 └── test/
     ├── regressione.js            22 casi di verifica del motore
-    ├── sequenza-partenza.js      17 casi sulla sequenza RRS E3.4
+    ├── sequenza-partenza.js      22 casi sulla sequenza RRS E3.4
     ├── invio-campionato.js       10 casi sull'invio delle tappe
     └── motore.js                 motore estratto da index.html
 ```
@@ -93,7 +93,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.16` a `rcsails-15.17`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.17` a `rcsails-15.18`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -145,6 +145,12 @@ alla **RRS E3.4**: segnali di avviso, preparatorio e partenza a intervalli di un
 minuto, un segnale ogni dieci secondi nell'ultimo minuto, uno al secondo negli
 ultimi dieci, e la tromba al via.
 
+Il conteggio può essere **a voce** — i numeri scanditi dalla voce del dispositivo,
+ammessi dalla regola come segnali vocali — oppure a **soli segnali acustici**.
+Avviso, preparatorio e partenza restano in ogni caso toni sintetizzati: la sintesi
+vocale ha una latenza variabile e la regola impone che ogni segnale sia conteggiato
+dall'inizio del suono.
+
 I suoni sono sintetizzati — nessun file audio — e sono programmati in anticipo
 sull'orologio della scheda audio, non con un timer: non derivano e non si
 bloccano se il browser rallenta. Lo schermo resta acceso per tutta la procedura.
@@ -154,6 +160,7 @@ ridotta, che va dichiarata nelle Istruzioni di Regata perché omette il segnale 
 avviso. È previsto anche il **richiamo generale** con i due suoni della RRS E3.6.
 
 Sul telefono: alzare il volume e, su iPhone, disattivare la suoneria silenziosa.
+Il pulsante **Prova la voce** permette di verificare tutto prima della partenza.
 
 ## Campionato su più tappe
 

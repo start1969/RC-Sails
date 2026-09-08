@@ -223,6 +223,8 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   background:var(--white);border-radius:var(--rr);padding:26px 22px 18px;
   max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-lg);
   transition:background .25s ease;
+  /* Il pannello di impostazione può superare l'altezza di uno schermo piccolo */
+  max-height:92vh;overflow-y:auto;
 }
 .seq-box.seq-prep{background:#FFF8E6}
 .seq-box.seq-finale{background:#FCEDEA}
@@ -249,6 +251,12 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 }
 .seq-opt.active .seq-opt-t{color:var(--navy)}
 .seq-opt-s{display:block;font-size:.66rem;color:var(--gray4);margin-top:3px;line-height:1.3}
+.seq-prova-voce{
+  width:100%;margin-top:8px;padding:9px;border:1.5px solid var(--gray3);
+  background:transparent;color:var(--gray4);border-radius:var(--r);cursor:pointer;
+  font-family:var(--font-display);font-weight:700;font-size:.74rem;
+  letter-spacing:.05em;text-transform:uppercase;
+}
 .seq-nota{font-size:.72rem;color:var(--gray4);line-height:1.5;text-align:left;margin-bottom:10px}
 .seq-avviso{
   font-size:.72rem;color:#8A6D1E;background:#FFF8E6;border-left:3px solid var(--gold);
@@ -693,6 +701,25 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
           </button>
         </div>
       </div>
+      <div class="seq-campo">
+        <label>Conteggio</label>
+        <div class="seq-scelta">
+          <button class="seq-opt" id="voce-off" onclick="setVoce(false)">
+            <span class="seq-opt-t">&#128266; Segnali</span>
+            <span class="seq-opt-s">solo suoni</span>
+          </button>
+          <button class="seq-opt active" id="voce-on" onclick="setVoce(true)">
+            <span class="seq-opt-t">&#128483; Voce</span>
+            <span class="seq-opt-s">numeri scanditi</span>
+          </button>
+        </div>
+        <button class="seq-prova-voce" onclick="provaVoce()">&#9654; Prova la voce</button>
+        <div class="seq-avviso" id="voce-avviso" style="display:none;margin-top:8px">
+          &#9888; Nessuna voce italiana trovata su questo dispositivo: verrà usata
+          quella predefinita del sistema, o solo i segnali acustici.
+        </div>
+      </div>
+
       <div class="seq-nota" id="seq-nota">
         Sequenza della <b>RRS E3.4</b>: segnali a intervalli di un minuto.
         Nell'ultimo minuto un segnale ogni dieci secondi, e negli ultimi dieci
@@ -723,7 +750,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.16</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.17</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -871,7 +898,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.16</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.17</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -3588,6 +3615,10 @@ let seqT0 = 0;              // istante del segnale di partenza, in tempo audio
 let seqTimer = null;        // handle del ciclo di disegno
 let seqDurata = 120;        // secondi dal primo segnale alla partenza
 let seqWakeLock = null;     // per tenere lo schermo acceso
+let codaVoce = [];          // annunci vocali ancora da emettere
+// Anticipo con cui si lancia il parlato, per compensare la latenza del
+// motore vocale: l'audio deve iniziare quando il numero è quello giusto.
+const ANTICIPO_VOCE = 0.22;
 
 function audioCtx() {
   if(!ac) {
@@ -3638,6 +3669,65 @@ const beepBreve  = t => tono(t, 880,  0.12, 0.35);
 const beepDecina = t => tono(t, 660,  0.18, 0.32);
 const segnale    = t => tono(t, 990,  0.55, 0.40, "triangle");
 
+// ── Voce ─────────────────────────────────────────────────────────────
+// La RRS E3.4 ammette "segnali sonori o vocali" per i conteggi intermedi,
+// quindi la voce è regolamentare. NON la si usa però per i tre segnali
+// ufficiali (avviso, preparatorio, partenza): la sintesi vocale ha una
+// latenza variabile di un decimo di secondo o più, e la regola impone che
+// ogni segnale sia conteggiato dall'inizio del suono. Quelli restano toni
+// programmati sull'orologio audio, precisi al campione.
+
+let voceIT = null;
+let voceAttiva = true;
+
+function scegliVoce() {
+  if(!window.speechSynthesis) return null;
+  const v = speechSynthesis.getVoices();
+  if(!v.length) return null;
+  return v.find(x => /^it/i.test(x.lang) && /google|alice|luca|federica/i.test(x.name))
+      || v.find(x => /^it/i.test(x.lang))
+      || null;
+}
+
+function parla(testo, urgente) {
+  if(!voceAttiva || !window.speechSynthesis) return;
+  try {
+    if(urgente) speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(testo);
+    if(!voceIT) voceIT = scegliVoce();
+    if(voceIT) u.voice = voceIT;
+    u.lang = voceIT ? voceIT.lang : "it-IT";
+    // Cadenza serrata: un numero al secondo non ammette pause
+    u.rate = 1.25; u.pitch = 1.0; u.volume = 1.0;
+    speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+// La prima chiamata a un motore vocale ha sempre una latenza maggiore:
+// la si consuma prima dell'avvio, non durante il conto alla rovescia.
+function scaldaVoce() {
+  if(!voceAttiva || !window.speechSynthesis) return;
+  try {
+    const u = new SpeechSynthesisUtterance(" ");
+    u.volume = 0.01; speechSynthesis.speak(u);
+  } catch(e) {}
+}
+
+function setVoce(on) {
+  voceAttiva = on;
+  const b1 = document.getElementById("voce-off"), b2 = document.getElementById("voce-on");
+  if(b1) b1.classList.toggle("active", !on);
+  if(b2) b2.classList.toggle("active", on);
+  const av = document.getElementById("voce-avviso");
+  if(av) av.style.display = (on && !scegliVoce()) ? "block" : "none";
+}
+
+function provaVoce() {
+  if(!voceAttiva) { showToast("Voce disattivata"); return; }
+  scaldaVoce();
+  setTimeout(() => parla("Tre. Due. Uno. Via."), 150);
+}
+
 // ── Costruzione della sequenza ───────────────────────────────────────
 // Restituisce l'elenco dei momenti, in secondi PRIMA della partenza.
 function eventiSequenza(durata) {
@@ -3666,14 +3756,17 @@ function setDurataSeq(sec) {
     if(b) b.classList.toggle("active", s === sec);
   });
   const nota = document.getElementById("seq-nota");
-  if(nota) nota.innerHTML = sec === 120
+  if(nota) nota.innerHTML = (sec === 120
     ? "Sequenza della <b>RRS E3.4</b>: segnali a intervalli di un minuto. "
       + "Nell'ultimo minuto un segnale ogni dieci secondi, e negli ultimi dieci "
       + "secondi uno al secondo. Ogni segnale è conteggiato dall'inizio del suono."
     : "Sequenza ridotta: un solo segnale preparatorio a un minuto dalla partenza, "
       + "poi un segnale ogni dieci secondi e uno al secondo negli ultimi dieci. "
       + "La <b>RRS E3.4</b> prevede anche il segnale di avviso: se la usi, "
-      + "dichiarala nelle Istruzioni di Regata.";
+      + "dichiarala nelle Istruzioni di Regata.")
+    + "<br><br>Avviso, preparatorio e partenza restano <b>toni</b>, precisi al "
+    + "campione. La voce scandisce i conteggi intermedi, ammessi dalla regola "
+    + "come segnali vocali.";
 }
 
 // ── Avvio ────────────────────────────────────────────────────────────
@@ -3687,13 +3780,29 @@ async function avviaSequenza() {
   // in cui il contesto audio si sta ancora avviando.
   seqT0 = c.currentTime + 0.5 + seqDurata;
 
+  // I toni sono programmati in anticipo sull'orologio audio.
+  // Con la voce attiva i beep dei conteggi sono soppressi: si sovrapporrebbero
+  // al parlato. Restano i tre segnali ufficiali e la tromba.
   ev.forEach(e => {
     const t = seqT0 - e.s;
     if(e.tipo === "segnale")  segnale(t);
-    if(e.tipo === "decina")   beepDecina(t);
-    if(e.tipo === "secondo")  beepBreve(t);
     if(e.tipo === "partenza") tromba(t, 1.6);
+    if(!voceAttiva && e.tipo === "decina") beepDecina(t);
+    if(!voceAttiva && e.tipo === "secondo") beepBreve(t);
   });
+
+  // La voce non è programmabile in anticipo: si accoda e viene emessa dal
+  // ciclo di disegno, che legge lo stesso orologio audio dei toni.
+  codaVoce = [];
+  if(voceAttiva) {
+    ev.forEach(e => {
+      if(e.tipo === "segnale")  codaVoce.push({ s:e.s, testo:e.testo.toLowerCase() });
+      if(e.tipo === "decina")   codaVoce.push({ s:e.s, testo:String(e.s) });
+      if(e.tipo === "secondo")  codaVoce.push({ s:e.s, testo:String(e.s) });
+      if(e.tipo === "partenza") codaVoce.push({ s:e.s, testo:"via" });
+    });
+    scaldaVoce();
+  }
 
   document.getElementById("seq-setup").style.display = "none";
   document.getElementById("seq-run").style.display = "block";
@@ -3713,6 +3822,12 @@ function disegnaSequenza() {
   const num = document.getElementById("seq-num");
   const fase = document.getElementById("seq-fase");
   const box = document.getElementById("seq-box");
+
+  // Annunci vocali dovuti: si emettono leggendo lo stesso orologio dei toni
+  while(codaVoce.length && rimasti <= codaVoce[0].s + ANTICIPO_VOCE) {
+    const a = codaVoce.shift();
+    parla(a.testo, a.s <= 10);
+  }
 
   if(rimasti <= -3) { chiudiSequenza(); return; }
 
@@ -3757,6 +3872,7 @@ function apriSequenza() {
   document.getElementById("seq-annulla").style.display = "none";
   const p = state.races[currentRace];
   setDurataSeq(parseInt(document.getElementById("seq-durata").value) || 120);
+  setVoce(voceAttiva);
   document.getElementById("seq-prova").textContent =
     "Prova " + (currentRace + 1) + (p && p.confirmed ? " — già confermata" : "");
 }
@@ -3766,6 +3882,8 @@ function chiudiSequenza() {
   if(seqWakeLock) { try { seqWakeLock.release(); } catch(e) {} seqWakeLock = null; }
   // Si chiude il contesto per zittire i suoni ancora programmati
   if(ac) { try { ac.close(); } catch(e) {} ac = null; }
+  codaVoce = [];
+  if(window.speechSynthesis) { try { speechSynthesis.cancel(); } catch(e) {} }
   window.__ultimoVib = null;
   document.getElementById("seq-overlay").style.display = "none";
 }
@@ -4325,6 +4443,10 @@ function mostraSplash() {
   setTimeout(chiudiSplash, 3800);   // si chiude da solo: non intralcia la regata
 }
 
+if(window.speechSynthesis) {
+  speechSynthesis.onvoiceschanged = () => { voceIT = scegliVoce(); setVoce(voceAttiva); };
+}
+
 loadState();
 caricaCamp();
 syncDiscardUI();
@@ -4358,7 +4480,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.16";
+const APP_VERSION = "15.17";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
