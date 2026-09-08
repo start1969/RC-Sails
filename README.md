@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.8
+# RC Sails Scoring — v15.10
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -91,7 +91,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.8` a `rcsails-15.9`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.10` a `rcsails-15.11`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -135,6 +135,38 @@ verificato.
 Da eseguire **dopo ogni modifica** alla logica di punteggio.
 
 ---
+
+## Campionato su più tappe
+
+Ogni regata esporta una **Scheda Evento** (file `.rcsails`) dalla pagina
+Classifica: contiene identità dell'evento, formula di punteggio applicata e
+classifica finale, con un'impronta che rileva alterazioni manuali.
+
+La pagina **Campionato** importa le schede e calcola la classifica di stagione.
+Due criteri disponibili:
+
+- **Piazzamenti di tappa** — il posto conseguito vale i punti. Corretto quando
+  le tappe hanno un numero di prove diverso.
+- **Somma dei punteggi netti** — da usare solo se tutte le tappe hanno la
+  stessa formula.
+
+Gli assenti sono valutati con un punto in più degli iscritti al campionato
+(predefinito) oppure dei classificati della tappa: la scelta va allineata al Bando.
+
+Due leve distinte governano la partecipazione: gli **scarti di tappa** perdonano
+l'imprevisto, le **presenze minime** pretendono la partecipazione. Chi non
+raggiunge la soglia resta classificato ma fuori graduatoria (FG). Indicando le
+**tappe in programma** la classifica è marcata come provvisoria finché non sono
+tutte disputate.
+
+Un controllo di coerenza segnala in configurazione le combinazioni di parametri
+che producono un campionato poco difendibile.
+
+Il file `.rcsails` è anche il modo per **trasferire una regata fra dispositivi**:
+il comitato la esporta, il segretario la importa.
+
+Regata e campionato hanno archivi separati: azzerare la regata non tocca il
+campionato.
 
 ## Nota sulla configurazione
 

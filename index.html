@@ -58,6 +58,9 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* Compensazione per l'assenza di una condensata dedicata: le grottesche di
    sistema sono più larghe, quindi si stringono dove il supporto esiste. */
+#nav{overflow-x:auto;scrollbar-width:none}
+#nav::-webkit-scrollbar{display:none}
+.nav-btn{min-width:62px;font-size:.62rem;padding-left:2px;padding-right:2px}
 .nav-btn,.page-header-text h1,.header-badge,.card-header,.btn,.toggle-btn,
 .section-title,.sail-badge,.standings-table th,.net-score,.summary-card .val,
 .race-tab,.doc-club,.doc-title,.doc-sec h2,.doc-status,.doc-tab th{
@@ -98,18 +101,24 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 .page.active{display:flex}
 /* ── HEADER ── */
 .page-header{
-  background:var(--navy);padding:calc(16px + var(--safe-t)) 20px 14px;
+  background:var(--navy);padding:15px 18px 13px;
   display:flex;align-items:center;gap:12px;
   position:sticky;top:0;z-index:10;
   box-shadow:0 2px 8px rgba(13,31,60,.3);
   flex-shrink:0;
 }
-.page-header img{width:44px;height:44px;border-radius:50%}
+.page-header img{width:50px;height:50px;border-radius:50%;flex-shrink:0}
+.page-header-text{min-width:0;flex:1}
 .page-header-text h1{
-  font-family:var(--font-display);font-size:1.15rem;
-  font-weight:800;color:var(--white);letter-spacing:.07em;text-transform:uppercase;
+  font-family:var(--font-display);font-size:1.55rem;line-height:1.06;
+  font-weight:900;color:var(--white);letter-spacing:.045em;text-transform:uppercase;
+  /* Il nome del club può essere lungo: si riduce invece di andare a capo */
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
-.page-header-text p{font-size:.75rem;color:var(--gray3);margin-top:2px}
+.page-header-text p{
+  font-size:.78rem;color:var(--gray3);margin-top:3px;letter-spacing:.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
 .header-badge{
   margin-left:auto;background:var(--gold);color:var(--dark);
   font-family:var(--font-display);font-weight:900;
@@ -157,6 +166,30 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   padding:1px 6px;border-radius:10px;letter-spacing:.05em;margin-left:6px;
 }
 .code-tag{font-size:.58rem;font-weight:900;margin-left:1px}
+/* ══ AVVISO DI AVVIO ══════════════════════════════════════════════ */
+#splash{
+  position:fixed;inset:0;z-index:2000;display:none;
+  align-items:center;justify-content:center;padding:24px;
+  background:rgba(13,31,60,.78);backdrop-filter:blur(6px);
+  animation:splash-in .28s ease;
+}
+#splash.on{display:flex}
+#splash.off{animation:splash-out .3s ease forwards}
+.splash-box{
+  background:var(--white);border-radius:var(--rr);padding:30px 26px 22px;
+  max-width:340px;width:100%;text-align:center;box-shadow:var(--shadow-lg);
+}
+.splash-box img{width:74px;height:74px;border-radius:50%;margin-bottom:14px}
+.splash-box h2{
+  font-family:var(--font-display);font-weight:900;font-size:1.55rem;
+  color:var(--navy);letter-spacing:.05em;text-transform:uppercase;line-height:1.05;
+}
+.splash-box h2 span{color:var(--gray4);font-size:.95rem;letter-spacing:.04em}
+.splash-sub{font-size:.82rem;color:var(--gray4);margin-top:9px;line-height:1.45}
+.splash-rule{height:2px;background:var(--gold);width:44px;margin:16px auto}
+.splash-legal{font-size:.7rem;color:var(--gray4);line-height:1.5;margin-bottom:18px}
+@keyframes splash-in{from{opacity:0}to{opacity:1}}
+@keyframes splash-out{to{opacity:0;visibility:hidden}}
 /* ══ DOCUMENTI UFFICIALI ══════════════════════════════════════════ */
 #print-area{display:none}
 @media screen{ body.printing #print-area{display:none} }
@@ -165,8 +198,9 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   html,body{height:auto;overflow:visible;background:#fff}
   /* Si nascondono gli elementi noti invece dei figli diretti di body:
      regola indipendente da dove si trova il contenitore di stampa. */
-  #app,#nav,#protest-modal,#race-summary,#picker,#confirm-overlay,
-  .confirm-overlay,.toast{display:none !important}
+  /* Il contenitore di stampa è il PRIMO figlio di <body>: si nasconde
+     tutto il resto a quel livello, comprese le finestre create a runtime. */
+  body>*:not(#print-area){display:none !important}
   #print-area{display:block !important;position:static;
     font-family:var(--font-body);color:#000;font-size:9pt;line-height:1.35;
     /* Senza questo i browser eliminano gli sfondi: le intestazioni di
@@ -527,6 +561,23 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <body>
 <div id="print-area"></div>
 
+<!-- ── Avviso di avvio ──────────────────────────────────────────── -->
+<div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
+  <div class="splash-box">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.10</span></h2>
+    <p class="splash-sub">
+      Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
+    </p>
+    <div class="splash-rule"></div>
+    <p class="splash-legal">
+      &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
+      Include SheetJS CE (Apache 2.0)
+    </p>
+    <button class="btn btn-gold btn-block" onclick="chiudiSplash()">Continua</button>
+  </div>
+</div>
+
 <!-- ══════════════════════════════════════════════════════════ APP ══════ -->
 <div id="app">
 
@@ -733,7 +784,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.8</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.10</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -815,6 +866,16 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       </div>
     </div>
 
+    <div style="padding:0 16px 8px">
+      <button class="btn btn-block" style="background:var(--blue);color:#fff;padding:14px"
+        onclick="esportaSchedaEvento()">
+        &#128228; Esporta Scheda Evento (.rcsails)
+      </button>
+      <div class="hint" style="text-align:center;margin-top:5px">
+        Il file da caricare nel Campionato, e da passare a un altro dispositivo.
+      </div>
+    </div>
+
     <div style="padding:0 16px 4px;display:flex;gap:8px">
       <button class="btn btn-primary" style="flex:1;font-size:.82rem" onclick="exportExcel()">
         📊 Esporta Excel
@@ -868,6 +929,124 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   </div>
 </div>
 
+
+<!-- ══════════════════════════════════════════════════ CAMPIONATO ══════ -->
+<div class="page" id="page-champ">
+  <div class="page-header">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
+    <div class="page-header-text">
+      <h1>Campionato</h1>
+      <p>Classifica di stagione su più tappe</p>
+    </div>
+  </div>
+
+  <div class="summary-row" id="camp-summary"></div>
+
+  <div class="page-body">
+    <div class="section-title">Tappe</div>
+    <div class="card"><div class="card-body">
+      <div id="camp-tappe"></div>
+      <div onclick="document.getElementById('camp-file').click()"
+        style="border:2px dashed var(--gray3);border-radius:var(--r);padding:16px;
+        text-align:center;cursor:pointer;background:var(--gray1);margin-top:12px">
+        <div style="font-size:1.5rem;margin-bottom:4px">&#128229;</div>
+        <div style="font-size:.85rem;color:var(--gray4)">
+          <strong>Carica una Scheda Evento</strong><br>file .rcsails esportato da una regata</div>
+        <input type="file" id="camp-file" accept=".rcsails,.json" style="display:none"
+          onchange="importaSchedaEvento(this)">
+      </div>
+    </div></div>
+
+    <div class="section-title">Classifica</div>
+    <div id="camp-stato"></div>
+    <div class="card"><div class="card-body" style="padding:0;overflow-x:auto">
+      <table class="standings-table" style="min-width:100%">
+        <thead id="camp-thead"></thead>
+        <tbody id="camp-tbody"></tbody>
+      </table>
+    </div></div>
+
+    <div style="padding:0 0 8px">
+      <button class="btn btn-block" style="background:var(--navy);color:#fff;padding:15px"
+        onclick="stampaCampionato()">
+        &#128424; Classifica di Campionato — Stampa / PDF
+      </button>
+    </div>
+
+    <div class="section-title">Formula del Campionato</div>
+    <div class="alert alert-info">
+      <span>&#9878;</span>
+      <span>Anche questi parametri devono corrispondere al <b>Bando</b> del campionato.</span>
+    </div>
+    <div class="card"><div class="card-body">
+      <div class="field"><label>Denominazione</label>
+        <input type="text" id="camp-nome" placeholder="es. Campionato Sociale"></div>
+      <div class="field-row">
+        <div class="field"><label>Club</label><input type="text" id="camp-club"></div>
+        <div class="field"><label>Classe</label><input type="text" id="camp-classe"></div>
+      </div>
+      <div class="field"><label>Stagione</label>
+        <input type="text" id="camp-stagione" placeholder="es. 2025/2026"></div>
+
+      <div class="field">
+        <label>Criterio di Punteggio</label>
+        <select id="camp-modo">
+          <option value="piazzamenti">Piazzamenti di tappa — il posto vale i punti</option>
+          <option value="netti">Somma dei punteggi netti di tappa</option>
+        </select>
+        <div class="hint">
+          <b>Piazzamenti</b>: chi vince una tappa prende 1 punto, il secondo 2 e così via.
+          È il criterio corretto quando le tappe hanno numero di prove diverso.<br>
+          <b>Netti</b>: si sommano i punteggi netti. Usalo solo se tutte le tappe hanno
+          la stessa formula, altrimenti chi corre la tappa più lunga è penalizzato.
+        </div>
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>Tappe in Programma</label>
+          <input type="number" id="camp-programma" min="0" max="40" value="0"></div>
+        <div class="field"><label>Presenze Minime</label>
+          <input type="number" id="camp-presenze" min="0" max="40" value="0"></div>
+      </div>
+      <div class="hint" style="margin-top:-8px;margin-bottom:12px">
+        <b>Tappe in programma</b>: se indicato, finché non sono tutte disputate la
+        classifica è marcata come provvisoria. Lascia 0 se il programma non è definito.<br>
+        <b>Presenze minime</b>: sotto questa soglia il concorrente resta classificato
+        ma fuori graduatoria. Lascia 0 per non applicarla.
+      </div>
+
+      <div class="field-row">
+        <div class="field"><label>Scarti di Tappa</label>
+          <input type="number" id="camp-scarti" min="0" max="20" value="0"></div>
+        <div class="field"><label>Assenti</label>
+          <select id="camp-assenti">
+            <option value="campionato">Iscritti al campionato + 1</option>
+            <option value="evento">Classificati della tappa + 1</option>
+          </select></div>
+      </div>
+      <div class="hint" style="margin-top:-6px">
+        A parità di punteggio peggiore si esclude la tappa disputata per prima,
+        secondo il criterio della RRS A2.1.<br>
+        <b>Iscritti + 1</b> rende il costo di un'assenza uguale per tutte le tappe e
+        noto in anticipo. <b>Classificati della tappa + 1</b> lo fa dipendere da quanti
+        si presentano quel giorno: saltare una giornata affollata costa di più.
+      </div>
+
+      <div id="camp-sugg" class="hint"
+        style="margin-top:12px;padding:11px 13px;background:var(--gray1);
+        border-radius:var(--r);border-left:3px solid var(--gold);line-height:1.5"></div>
+
+      <div class="sub-head">Azzeramento</div>
+      <button onclick="azzeraCamp()" style="width:100%;padding:12px;border:2px solid var(--red);
+        border-radius:var(--r);background:transparent;color:var(--red);
+        font-family:var(--font-display);font-weight:900;font-size:.95rem;
+        cursor:pointer;letter-spacing:.06em;text-transform:uppercase">
+        &#128465; Rimuovi tutte le tappe</button>
+    </div></div>
+    <div style="height:20px"></div>
+  </div>
+</div>
+
 </div>
 
 <!-- ── BOTTOM NAV ──────────────────────────────────────────────────── -->
@@ -882,7 +1061,10 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
     <span class="icon">🏆</span>Classifica
   </button>
   <button class="nav-btn" onclick="navigate('rotation')" id="nav-rotation" style="display:none">
-    <span class="icon">🔄</span>Giudici
+    <span class="icon">&#128260;</span>Giudici
+  </button>
+  <button class="nav-btn" onclick="navigate('champ')" id="nav-champ">
+    <span class="icon">&#127942;</span>Campionato
   </button>
 </nav>
 
@@ -1193,6 +1375,7 @@ function navigate(page) {
   if(page==="race") renderRacePage();
   if(page==="standings") renderStandings();
   if(page==="rotation") renderRotation();
+  if(page==="champ") renderCamp();
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -3280,7 +3463,509 @@ function stampaDoc(tipo) {
 }
 
 
+// ══════════════════════════════════════════════════════════════════════
+// CAMPIONATO — aggregazione di più regate in una classifica di stagione
+//
+// Principio: il campionato NON aggrega le singole prove, aggrega i
+// RISULTATI CHIUSI di ogni tappa. Ogni regata produce una "scheda evento"
+// — un file .rcsails autonomo — che contiene identità dell'evento,
+// parametri di punteggio usati e classifica finale. Il campionato somma
+// le schede.
+//
+// Perché così e non aggregando le prove: tappe diverse possono avere
+// numero di prove, scarti e flotte diversi, quindi i punteggi netti non
+// sono confrontabili fra loro. I piazzamenti sì.
+//
+// La scheda evento è anche il mezzo di trasferimento fra dispositivi:
+// il comitato la esporta, il segretario la importa.
+// ══════════════════════════════════════════════════════════════════════
+
+const CHIAVE_CAMP = "rcsails_championship";
+const SCHEMA_EVENTO = 1;
+
+let camp = null;
+
+function campDefault() {
+  return {
+    schema: SCHEMA_EVENTO,
+    config: {
+      nome: "", club: "", classe: "DF65", stagione: "",
+      modo: "piazzamenti",      // piazzamenti | netti
+      tappeProgramma: 0,        // tappe previste dal programma (0 = non definito)
+      scartiTappe: 0,           // quante tappe si escludono
+      presenzeMin: 0,           // presenze necessarie per entrare in graduatoria
+      assenti: "campionato"     // campionato (iscritti+1) | evento (classificati+1)
+    },
+    eventi: []
+  };
+}
+
+function caricaCamp() {
+  try {
+    const s = localStorage.getItem(CHIAVE_CAMP);
+    camp = s ? Object.assign(campDefault(), JSON.parse(s)) : campDefault();
+    camp.config = Object.assign(campDefault().config, camp.config || {});
+    if(!Array.isArray(camp.eventi)) camp.eventi = [];
+  } catch(e) { camp = campDefault(); }
+}
+
+function salvaCamp() {
+  try { localStorage.setItem(CHIAVE_CAMP, JSON.stringify(camp)); }
+  catch(e) { showToast("Salvataggio campionato non riuscito"); }
+}
+
+// ── Impronta di integrità ────────────────────────────────────────────
+// Non è crittografia: serve a rilevare una scheda alterata a mano.
+function impronta(oggetto) {
+  const s = JSON.stringify(oggetto);
+  let h1 = 0x811c9dc5, h2 = 0x01000193;
+  for(let i=0;i<s.length;i++) {
+    const c = s.charCodeAt(i);
+    h1 = Math.imul(h1 ^ c, 16777619) >>> 0;
+    h2 = Math.imul(h2 + c, 2654435761) >>> 0;
+  }
+  return (h1.toString(16).padStart(8,"0") + h2.toString(16).padStart(8,"0")).toUpperCase();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// SCHEDA EVENTO — generazione dalla regata corrente
+// ══════════════════════════════════════════════════════════════════════
+function creaSchedaEvento() {
+  const c = state.config, sc = scoringCfg();
+  const isMulti = c.fleet === "multi";
+  const flotte = isMulti ? ["A","B"] : ["A"];
+  const risultati = [];
+
+  flotte.forEach(fl => {
+    const barche = isMulti ? getBoatsByFleet(fl) : state.boats;
+    if(!barche.length) return;
+    barche.map(b => ({boat:b, ...calcScore(b, fl)}))
+      .sort(compareSeries)
+      .forEach((r, i) => risultati.push({
+        pos: i+1, flotta: isMulti ? fl : null,
+        velico: r.boat.sail, nome: r.boat.name, club: r.boat.club || "",
+        lordi: r.gross, scarti: r.disc, netti: r.net, prove: r.n_played
+      }));
+  });
+
+  const valide = flotte.reduce((m,fl)=>Math.max(m, countPlayed(fl)), 0);
+  const corpo = {
+    formato: "rcsails-evento",
+    schema: SCHEMA_EVENTO,
+    evento: {
+      nome: c.name || "Regata", club: c.club || "", classe: c.classe || "",
+      campo: c.venue || "", data: c.date || "", dataFine: c.dateEnd || "",
+      comitato: c.officer || ""
+    },
+    formula: {
+      flotta: c.fleet, proveProgrammate: c.races, proveValide: valide,
+      proveMinime: c.minRaces, scarti: getDiscards(valide),
+      sistemaScarti: sc.discardMode, a53: !!sc.a53,
+      turnoGiuria: state.useJudge ? sc.judgeScore : "nessuno"
+    },
+    risultati: risultati,
+    generata: new Date().toISOString(),
+    app: (typeof APP_VERSION !== "undefined" ? APP_VERSION : "")
+  };
+  corpo.id = "EVT-" + (corpo.evento.data || "").replace(/-/g,"") + "-" + impronta(corpo).slice(0,6);
+  corpo.impronta = impronta(corpo);
+  return corpo;
+}
+
+function esportaSchedaEvento() {
+  if(!state.boats.length) { showToast("Nessun partecipante nella regata"); return; }
+  const s = creaSchedaEvento();
+  if(!s.risultati.length) { showToast("Nessun risultato da esportare"); return; }
+  const pulisci = t => (t||"").replace(/[^a-zA-Z0-9]/g,"_").replace(/_+/g,"_").replace(/^_|_$/g,"");
+  const nome = [pulisci(s.evento.club), pulisci(s.evento.nome), s.evento.data]
+    .filter(Boolean).join("_") + ".rcsails";
+  const blob = new Blob([JSON.stringify(s, null, 2)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = nome;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 400);
+  showToast("Scheda evento esportata", true);
+}
+
+// ── Importazione nel campionato ──────────────────────────────────────
+function importaSchedaEvento(input) {
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const fr = new FileReader();
+  fr.onload = () => {
+    let s;
+    try { s = JSON.parse(fr.result); }
+    catch(e) { showToast("File non leggibile"); input.value=""; return; }
+
+    if(s.formato !== "rcsails-evento" || !Array.isArray(s.risultati)) {
+      showToast("Non è una scheda evento RC Sails"); input.value=""; return;
+    }
+    // Verifica di integrità: si ricalcola l'impronta sul corpo senza id/impronta
+    const copia = Object.assign({}, s);
+    delete copia.id; delete copia.impronta;
+    const atteso = impronta(copia);
+    s.alterata = (s.impronta && s.impronta !== atteso);
+
+    if(camp.eventi.some(e => e.id === s.id)) {
+      showToast("Questa tappa è già stata importata"); input.value=""; return;
+    }
+    // Avvisi di coerenza, non blocchi: la decisione resta al segretario
+    const avvisi = [];
+    if(camp.config.classe && s.evento.classe && camp.config.classe !== s.evento.classe)
+      avvisi.push(`classe ${s.evento.classe} diversa da ${camp.config.classe}`);
+    if(s.alterata) avvisi.push("impronta di integrità non corrispondente");
+
+    camp.eventi.push(s);
+    camp.eventi.sort((a,b)=>(a.evento.data||"").localeCompare(b.evento.data||""));
+    if(!camp.config.nome && s.evento.nome) camp.config.nome = s.evento.nome;
+    if(!camp.config.club) camp.config.club = s.evento.club || "";
+    if(!camp.config.classe) camp.config.classe = s.evento.classe || "";
+    salvaCamp(); renderCamp();
+    showToast(avvisi.length ? "Tappa importata — " + avvisi.join(", ")
+                            : "Tappa importata: " + s.evento.nome, !avvisi.length);
+    input.value = "";
+  };
+  fr.readAsText(file);
+}
+
+function rimuoviTappa(id) {
+  const e = camp.eventi.find(x=>x.id===id);
+  if(!e) return;
+  showConfirm("Rimuovere la tappa?",
+    `"${e.evento.nome}" del ${dataBreve(e.evento.data)} sarà tolta dal campionato. `
+    + "Il file della scheda evento resta sul dispositivo.",
+    () => { camp.eventi = camp.eventi.filter(x=>x.id!==id); salvaCamp(); renderCamp(); });
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// CLASSIFICA DI CAMPIONATO
+// ══════════════════════════════════════════════════════════════════════
+function classificaCamp() {
+  const cfg = camp.config;
+  const tappe = camp.eventi;
+  if(!tappe.length) return [];
+
+  // Identità del concorrente: il numero velico. Il nome può cambiare
+  // grafia fra una tappa e l'altra, il velico no.
+  const atleti = new Map();
+  tappe.forEach(t => t.risultati.forEach(r => {
+    if(!atleti.has(r.velico))
+      atleti.set(r.velico, {velico:r.velico, nome:r.nome, club:r.club, nomi:new Set()});
+    atleti.get(r.velico).nomi.add(r.nome);
+  }));
+
+  const iscritti = atleti.size;
+
+  const righe = [...atleti.values()].map(a => {
+    const punti = tappe.map(t => {
+      const r = t.risultati.find(x => x.velico === a.velico);
+      if(r) return {
+        v: cfg.modo === "netti" ? r.netti : r.pos,
+        assente: false, pos: r.pos, netti: r.netti
+      };
+      // Assente da questa tappa
+      const base = cfg.assenti === "campionato" ? iscritti : t.risultati.length;
+      return {
+        v: cfg.modo === "netti"
+             ? Math.round((base + 1) * (t.formula.proveValide || 1) * 10) / 10
+             : base + 1,
+        assente: true, pos: null, netti: null
+      };
+    });
+
+    // Scarti di tappa — stessa regola della RRS A2.1: a parità si esclude
+    // la tappa disputata per prima.
+    const n = Math.min(cfg.scartiTappe || 0, Math.max(0, punti.length - 1));
+    const scartati = new Set(
+      punti.map((p,i)=>({v:p.v,i})).sort((x,y)=> y.v-x.v || x.i-y.i)
+           .slice(0,n).map(o=>o.i)
+    );
+    const lordi = round1(punti.reduce((s,p)=>s+p.v,0));
+    const scarto = round1([...scartati].reduce((s,i)=>s+punti[i].v,0));
+    const presenze = punti.filter(p=>!p.assente).length;
+    return {
+      ...a, punti, scartati,
+      lordi, scarto, netti: round1(lordi - scarto),
+      presenze,
+      // Sotto la soglia di presenze si resta classificati ma fuori graduatoria
+      fuori: (cfg.presenzeMin||0) > 0 && presenze < cfg.presenzeMin,
+      nomiDiversi: a.nomi.size > 1
+    };
+  });
+
+  // Parità: criterio RRS A8 trasposto alle tappe.
+  // Chi non raggiunge le presenze minime va in coda, fuori graduatoria.
+  righe.sort((a,b) => {
+    if(a.fuori !== b.fuori) return a.fuori ? 1 : -1;
+    if(a.netti !== b.netti) return a.netti - b.netti;
+    const lista = x => x.punti.map((p,i)=>({p,i})).filter(o=>!x.scartati.has(o.i))
+                        .map(o=>o.p.v).sort((m,n)=>m-n);
+    const la = lista(a), lb = lista(b);
+    for(let k=0;k<Math.min(la.length,lb.length);k++)
+      if(la[k]!==lb[k]) return la[k]-lb[k];
+    for(let r=a.punti.length-1;r>=0;r--)
+      if(a.punti[r].v !== b.punti[r].v) return a.punti[r].v - b.punti[r].v;
+    return 0;
+  });
+  return righe;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+// INTERFACCIA
+// ══════════════════════════════════════════════════════════════════════
+function leggiCampConfig() {
+  const v = id => { const e=document.getElementById(id); return e ? e.value : ""; };
+  camp.config.nome        = v("camp-nome");
+  camp.config.club        = v("camp-club");
+  camp.config.classe      = v("camp-classe");
+  camp.config.stagione    = v("camp-stagione");
+  camp.config.modo        = v("camp-modo") || "piazzamenti";
+  camp.config.tappeProgramma = Math.max(0, parseInt(v("camp-programma")) || 0);
+  camp.config.scartiTappe    = Math.max(0, parseInt(v("camp-scarti")) || 0);
+  camp.config.presenzeMin    = Math.max(0, parseInt(v("camp-presenze")) || 0);
+  camp.config.assenti        = v("camp-assenti") || "campionato";
+  salvaCamp(); renderCamp();
+}
+
+// Segnala all'organizzatore le combinazioni di parametri che, messe
+// insieme, producono un campionato poco difendibile.
+function suggerimentoCamp() {
+  const cfg = camp.config;
+  const tappe = cfg.tappeProgramma || camp.eventi.length;
+  const provePerTappa = camp.eventi.length
+    ? Math.round(camp.eventi.reduce((s,t)=>s+(t.formula.proveValide||0),0)/camp.eventi.length) : 0;
+  const scartiTappa = camp.eventi.length
+    ? Math.round(camp.eventi.reduce((s,t)=>s+(t.formula.scarti||0),0)/camp.eventi.length) : 0;
+  const av = [];
+
+  if(cfg.scartiTappe && !cfg.presenzeMin)
+    av.push("Con uno scarto di tappa e nessuna presenza minima, chi salta una "
+      + "giornata non paga nulla. Valuta una soglia di presenze.");
+  if(tappe && cfg.scartiTappe > Math.floor(tappe/5))
+    av.push(`Con ${tappe} tappe, ${cfg.scartiTappe} scarti sono molti: `
+      + `oltre uno ogni cinque il campionato misura le giornate fortunate.`);
+  if(cfg.presenzeMin && tappe && cfg.presenzeMin > tappe - cfg.scartiTappe)
+    av.push("La soglia di presenze supera le tappe utili: nessuno entrerebbe in graduatoria.");
+  if(cfg.modo === "netti" && camp.eventi.length > 1) {
+    const p = camp.eventi.map(t=>t.formula.proveValide);
+    if(Math.max(...p) !== Math.min(...p))
+      av.push(`Le tappe hanno da ${Math.min(...p)} a ${Math.max(...p)} prove: `
+        + "sommando i netti la tappa più lunga pesa di più. Usa i piazzamenti.");
+  }
+  if(scartiTappa && cfg.scartiTappe)
+    av.push(`Ogni tappa scarta già circa ${scartiTappa} prove su ${provePerTappa}: `
+      + "lo scarto di tappa si somma a quello.");
+
+  if(!av.length) return camp.eventi.length
+    ? '<span style="color:var(--green,#2E7D32)">&#10003; La formula impostata è coerente.</span>'
+    : "";
+  return "<b>&#9888; Da valutare</b><br>" + av.map(a=>"· "+a).join("<br>");
+}
+
+function renderCamp() {
+  const cfg = camp.config;
+  const set = (id,val) => { const e=document.getElementById(id); if(e) e.value = val==null?"":val; };
+  set("camp-nome", cfg.nome);   set("camp-club", cfg.club);
+  set("camp-classe", cfg.classe); set("camp-stagione", cfg.stagione);
+  set("camp-modo", cfg.modo);       set("camp-scarti", cfg.scartiTappe);
+  set("camp-programma", cfg.tappeProgramma); set("camp-presenze", cfg.presenzeMin);
+  set("camp-assenti", cfg.assenti);
+  const sug = document.getElementById("camp-sugg");
+  if(sug) sug.innerHTML = suggerimentoCamp();
+
+  // Elenco tappe
+  const el = document.getElementById("camp-tappe");
+  if(camp.eventi.length === 0) {
+    el.innerHTML = `<div class="empty-state" style="padding:26px 14px">
+      <div style="font-size:2rem;margin-bottom:8px">&#128202;</div>
+      <div style="font-weight:600;color:var(--gray4)">Nessuna tappa importata</div>
+      <div class="hint" style="margin-top:6px">
+        Da ogni regata esporta la <b>Scheda Evento</b> dalla pagina Classifica,
+        poi caricala qui.</div></div>`;
+  } else {
+    el.innerHTML = camp.eventi.map((t,i)=>`
+      <div class="boat-item">
+        <div class="sail-badge" style="min-width:34px">T${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div class="boat-name">${esc(t.evento.nome)}
+            ${t.alterata?'<span style="color:var(--red);font-size:.7rem"> &#9888; alterata</span>':''}</div>
+          <div class="boat-sub">${dataBreve(t.evento.data)} ·
+            ${t.risultati.length} class. · ${t.formula.proveValide} prove
+            ${t.formula.scarti?` · ${t.formula.scarti} scart${t.formula.scarti===1?"o":"i"}`:""}</div>
+        </div>
+        <button onclick="rimuoviTappa('${esc(t.id)}')"
+          style="border:none;background:var(--gray2);color:var(--red);border-radius:50%;
+          width:30px;height:30px;cursor:pointer;font-size:.9rem">&#10005;</button>
+      </div>`).join("");
+  }
+
+  // Riepilogo e classifica
+  const righe = classificaCamp();
+  const sum = document.getElementById("camp-summary");
+  const inGrad = righe.filter(r=>!r.fuori).length;
+  sum.innerHTML = `
+    <div class="summary-card"><div class="val">${camp.eventi.length}${
+      cfg.tappeProgramma?`<span style="font-size:.75rem;color:var(--gray4)">/${cfg.tappeProgramma}</span>`:""
+      }</div><div class="lbl">Tappe</div></div>
+    <div class="summary-card"><div class="val">${righe.length}</div><div class="lbl">Atleti</div></div>
+    <div class="summary-card"><div class="val">${cfg.scartiTappe}</div><div class="lbl">Scarti</div></div>
+    <div class="summary-card"><div class="val">${cfg.presenzeMin?inGrad:righe.length}</div>
+      <div class="lbl">${cfg.presenzeMin?"In grad.":"Class."}</div></div>`;
+
+  const st = document.getElementById("camp-stato");
+  if(st) {
+    const prov = cfg.tappeProgramma && camp.eventi.length < cfg.tappeProgramma;
+    st.innerHTML = camp.eventi.length ? `<div class="doc-status ${prov?"prov":"def"}"
+      style="border-left:3px solid ${prov?"var(--red)":"var(--navy)"};
+      background:${prov?"#FCF0EE":"#F0F3F9"};color:${prov?"#8A1E12":"var(--navy)"};
+      font-family:var(--font-display);font-weight:700;font-size:.8rem;
+      letter-spacing:.05em;text-transform:uppercase;padding:9px 12px;
+      border-radius:0 var(--r) var(--r) 0;margin-bottom:10px">
+      ${prov ? `Classifica provvisoria — ${camp.eventi.length} tappe su ${cfg.tappeProgramma} in programma`
+             : `Classifica — ${camp.eventi.length} tappe disputate`}</div>` : "";
+  }
+
+  const tb = document.getElementById("camp-tbody");
+  const th = document.getElementById("camp-thead");
+  if(!righe.length) { th.innerHTML=""; tb.innerHTML=""; return; }
+  th.innerHTML = `<tr><th>Pos</th><th style="text-align:left">Velico / Atleta</th>
+    ${camp.eventi.map((t,i)=>`<th title="${esc(t.evento.nome)}">T${i+1}</th>`).join("")}
+    <th>Lordi</th><th>Sc.</th><th>Netti</th></tr>`;
+  tb.innerHTML = righe.map((r,i)=>{
+    const celle = r.punti.map((p,k)=>{
+      const val = Number.isInteger(p.v) ? p.v : p.v.toFixed(1);
+      const cls = r.scartati.has(k) ? "score-cell score-discard"
+                : p.assente ? "score-cell score-dns" : "score-cell";
+      const tag = p.assente ? '<sup style="font-size:.55rem;font-weight:900">DNC</sup>' : "";
+      return `<td class="${cls}">${val}${tag}</td>`;
+    }).join("");
+    const n = x => Number.isInteger(x) ? x : x.toFixed(1);
+    return `<tr class="${r.fuori?"":(i<3?["pos-1","pos-2","pos-3"][i]:"")}"
+        style="${r.fuori?"opacity:.55":""}">
+      <td><div class="pos-badge" style="${r.fuori?"background:var(--gray2);color:var(--gray4)":""}"
+        >${r.fuori?"—":i+1}</div></td>
+      <td style="text-align:left;white-space:nowrap"><b>${esc(r.velico)}</b> ${esc(r.nome)}
+        ${r.nomiDiversi?'<span title="Nome diverso fra le tappe" style="color:var(--gold)">&#9888;</span>':''}
+        <div style="font-size:.68rem;color:${r.fuori?"var(--red)":"var(--gray4)"}">
+          ${r.presenze}/${camp.eventi.length} presenze${r.fuori?" · fuori graduatoria":""}</div></td>
+      ${celle}
+      <td>${n(r.lordi)}</td><td>${n(r.scarto)}</td>
+      <td class="net-score">${n(r.netti)}</td></tr>`;
+  }).join("");
+}
+
+// ── Documento di campionato ──────────────────────────────────────────
+function docCampionato() {
+  const cfg = camp.config, righe = classificaCamp();
+  const periodo = camp.eventi.length
+    ? `${dataBreve(camp.eventi[0].evento.data)} – ${dataBreve(camp.eventi[camp.eventi.length-1].evento.data)}`
+    : "";
+  let html = `<div class="doc-head">
+    <img src="${LOGO}" alt="" class="doc-logo" onerror="this.style.display='none'">
+    <div class="doc-head-txt">
+      <div class="doc-club">${esc(cfg.club||"")}${cfg.classe?` <span class="doc-cls">${esc(cfg.classe)}</span>`:""}</div>
+      <div class="doc-event">${esc(cfg.nome||"Campionato")}${cfg.stagione?` — ${esc(cfg.stagione)}`:""}</div>
+      <div class="doc-meta">${[periodo, camp.eventi.length+" tappe"].filter(Boolean).join(" · ")}</div>
+    </div>
+    <div class="doc-title">Classifica<br>di Campionato</div>
+  </div>`;
+
+  const prov = cfg.tappeProgramma && camp.eventi.length < cfg.tappeProgramma;
+  html += `<div class="doc-sec"><div class="doc-status ${prov?"prov":"def"}">
+    ${prov ? `CLASSIFICA PROVVISORIA — ${camp.eventi.length} TAPPE SU ${cfg.tappeProgramma} IN PROGRAMMA`
+           : `CLASSIFICA — ${camp.eventi.length} TAPPE DISPUTATE`} ·
+    ${righe.length} ATLETI ·
+    ${cfg.scartiTappe} SCART${cfg.scartiTappe===1?"O":"I"} DI TAPPA ·
+    ${cfg.modo==="netti"?"SOMMA DEI PUNTEGGI NETTI":"PIAZZAMENTI DI TAPPA"}
+  </div>`;
+
+  html += `<table class="doc-tab"><thead><tr>
+    <th class="c">Pos</th><th class="c">Velico</th><th>Atleta</th>
+    ${camp.eventi.map((t,i)=>`<th class="c">T${i+1}</th>`).join("")}
+    <th class="c">Pres.</th><th class="c">Lordi</th><th class="c">Sc.</th><th class="c">Netti</th>
+  </tr></thead><tbody>`;
+  righe.forEach((r,i)=>{
+    const n = x => Number.isInteger(x) ? x : x.toFixed(1);
+    const celle = r.punti.map((p,k)=>{
+      const val = n(p.v) + (p.assente ? "<sup>DNC</sup>" : "");
+      return r.scartati.has(k) ? `<td class="c sc">[${val}]</td>` : `<td class="c">${val}</td>`;
+    }).join("");
+    html += `<tr${(!r.fuori && i<3)?' class="podio"':''}${r.fuori?' style="color:#777"':''}>
+      <td class="c b">${r.fuori?"—":i+1}</td><td class="c b">${esc(r.velico)}</td>
+      <td>${esc(r.nome)}${r.fuori?' <sup>FG</sup>':''}</td>${celle}
+      <td class="c">${r.presenze}/${camp.eventi.length}</td>
+      <td class="c">${n(r.lordi)}</td><td class="c">${n(r.scarto)}</td>
+      <td class="c b">${n(r.netti)}</td></tr>`;
+  });
+  html += `</tbody></table>
+    <div class="doc-note"><b>DNC</b> assente dalla tappa &middot;
+      <b>[ ]</b> punteggio di tappa escluso${cfg.presenzeMin
+        ? " &middot; <b>FG</b> fuori graduatoria: presenze inferiori al minimo richiesto" : ""}</div></div>`;
+
+  // Elenco delle tappe con la formula applicata in ciascuna
+  html += `<div class="doc-sec"><h2>Tappe</h2>
+    <table class="doc-tab"><thead><tr>
+      <th class="c">N.</th><th>Denominazione</th><th class="c">Data</th>
+      <th class="c">Class.</th><th class="c">Prove</th><th class="c">Scarti</th>
+    </tr></thead><tbody>
+    ${camp.eventi.map((t,i)=>`<tr>
+      <td class="c b">T${i+1}</td><td>${esc(t.evento.nome)}</td>
+      <td class="c">${dataBreve(t.evento.data)}</td>
+      <td class="c">${t.risultati.length}</td>
+      <td class="c">${t.formula.proveValide}</td>
+      <td class="c">${t.formula.scarti}</td></tr>`).join("")}
+    </tbody></table></div>`;
+
+  html += `<div class="doc-sec"><div class="doc-note">
+    <b>Criterio di punteggio.</b> ${cfg.modo==="netti"
+      ? "A ogni atleta è attribuito il punteggio netto conseguito in ciascuna tappa."
+      : "A ogni atleta è attribuito come punteggio il piazzamento conseguito in ciascuna tappa."}
+    Gli assenti sono valutati ${cfg.assenti==="campionato"
+      ? "con un punto in più del numero di atleti iscritti al campionato"
+      : "con un punto in più del numero di classificati in quella tappa"}.
+    ${cfg.scartiTappe === 1 ? "Si esclude la peggiore tappa; a parità si esclude la tappa disputata per prima."
+      : cfg.scartiTappe ? `Si escludono le ${cfg.scartiTappe} peggiori tappe; a parità si esclude la tappa disputata per prima.`
+      : "Nessuna tappa viene esclusa."}
+    ${cfg.presenzeMin ? `Per essere inseriti in graduatoria è necessario aver partecipato ad almeno ${cfg.presenzeMin} tapp${cfg.presenzeMin===1?"a":"e"}; chi non raggiunge la soglia è classificato fuori graduatoria (FG).` : ""}
+    Le parità sono risolte con il criterio della RRS A8 applicato alle tappe.
+  </div></div>`;
+  html += pieDoc();
+  return html;
+}
+
+function stampaCampionato() {
+  if(!camp.eventi.length) { showToast("Nessuna tappa importata"); return; }
+  const area = document.getElementById("print-area");
+  area.innerHTML = docCampionato();
+  setTimeout(()=>window.print(), 120);
+}
+
+function azzeraCamp() {
+  showConfirm("Azzerare il campionato?",
+    "Tutte le tappe importate saranno rimosse. La configurazione viene mantenuta. "
+    + "I file .rcsails restano sul dispositivo e possono essere ricaricati.",
+    () => { camp.eventi = []; salvaCamp(); renderCamp(); showToast("Campionato azzerato"); });
+}
+
+
+// ── Avviso di avvio ──────────────────────────────────────────────────
+function chiudiSplash() {
+  const s = document.getElementById("splash");
+  if(!s || !s.classList.contains("on")) return;
+  s.classList.add("off");
+  setTimeout(()=>{ s.classList.remove("on","off"); }, 300);
+}
+
+function mostraSplash() {
+  const s = document.getElementById("splash");
+  if(!s) return;
+  s.classList.add("on");
+  s.addEventListener("click", e => { if(e.target === s) chiudiSplash(); });
+  setTimeout(chiudiSplash, 3800);   // si chiude da solo: non intralcia la regata
+}
+
 loadState();
+caricaCamp();
 syncDiscardUI();
 applyBranding();
 
@@ -3288,6 +3973,11 @@ applyBranding();
 document.getElementById("page-setup").addEventListener("change", e=>{
   if(e.target.id && e.target.id.indexOf("cfg-")===0) readConfig();
 });
+document.getElementById("page-champ").addEventListener("change", e=>{
+  if(e.target.id && e.target.id.indexOf("camp-")===0 && e.target.type!=="file") leggiCampConfig();
+});
+renderCamp();
+mostraSplash();
 if(!state.protests) state.protests=[];
 syncUI();
 renderBoatList();
@@ -3307,7 +3997,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.8";
+const APP_VERSION = "15.10";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
