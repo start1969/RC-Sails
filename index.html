@@ -213,6 +213,32 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   letter-spacing:.03em;text-transform:uppercase;
 }
 .action-minor .mini-orange{border-color:var(--orange,#E67E22);color:var(--orange,#E67E22)}
+/* ══ INVITO A INSTALLARE ══════════════════════════════════════════ */
+#banner-installa{
+  position:fixed;left:10px;right:10px;z-index:1200;
+  bottom:calc(var(--nav-h) + var(--safe-b, 0px) + 10px);
+  background:var(--white);border-radius:var(--rr);box-shadow:var(--shadow-lg);
+  padding:11px 12px;display:flex;align-items:center;gap:11px;
+  border-left:4px solid var(--gold);animation:bi-su .3s ease;
+}
+@keyframes bi-su{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+#banner-installa img{width:38px;height:38px;border-radius:50%;flex-shrink:0}
+.bi-txt{flex:1;min-width:0;line-height:1.3}
+.bi-txt b{
+  display:block;font-family:var(--font-display);font-weight:800;font-size:.92rem;
+  color:var(--navy);letter-spacing:.03em;
+}
+.bi-txt span{display:block;font-size:.68rem;color:var(--gray4);margin-top:2px}
+.bi-si{
+  flex-shrink:0;background:var(--gold);color:var(--dark);border:none;
+  border-radius:var(--r);padding:10px 14px;cursor:pointer;
+  font-family:var(--font-display);font-weight:900;font-size:.8rem;
+  letter-spacing:.05em;text-transform:uppercase;
+}
+.bi-no{
+  flex-shrink:0;background:none;border:none;color:var(--gray3);
+  cursor:pointer;font-size:1rem;padding:4px 2px;
+}
 /* ══ SEQUENZA DI PARTENZA ═════════════════════════════════════════ */
 #seq-overlay{
   position:fixed;inset:0;z-index:1900;display:none;
@@ -750,7 +776,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.17</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.18</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -885,6 +911,9 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
           <input type="file" id="import-xl-inp" accept=".xlsx" style="display:none" onchange="importFromXlsx(this)">
         </div>
         <div id="import-xl-preview" style="margin-top:8px"></div>
+        <div class="sub-head">Installazione</div>
+        <div id="installa-box"></div>
+
         <div class="sub-head">Documenti</div>
         <button class="btn btn-outline btn-block" onclick="stampaDoc('idr')">
           &#9878; Estratto Istruzioni di Regata
@@ -898,7 +927,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.17</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.18</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -3594,6 +3623,160 @@ function stampaDoc(tipo) {
 
 
 // ══════════════════════════════════════════════════════════════════════
+// INSTALLAZIONE SULLA SCHERMATA HOME
+//
+// Android e desktop espongono l'evento beforeinstallprompt: si intercetta,
+// si conserva, e lo si presenta con un pulsante proprio. Un tocco e l'app
+// è installata.
+//
+// iOS non espone nulla di simile: Apple non consente a una pagina di
+// avviare l'installazione. L'unica via è Condividi > Aggiungi a schermata
+// Home, fatta a mano. Si riconosce il dispositivo e si mostrano le
+// istruzioni, che è il massimo consentito.
+//
+// Installare non è un vezzo: è la condizione che il browser valuta per
+// concedere l'archiviazione persistente, cioè per non cancellare i dati
+// di regata quando lo spazio scarseggia.
+// ══════════════════════════════════════════════════════════════════════
+
+let promptInstall = null;
+let installataOra = false;   // l'evento appinstalled precede il passaggio a finestra propria
+
+function giaInstallata() {
+  return window.matchMedia("(display-mode: standalone)").matches
+      || window.navigator.standalone === true;
+}
+
+function isIOS() {
+  return /iphone|ipad|ipod/i.test(navigator.userAgent)
+      || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+
+function isSafari() {
+  return /^((?!chrome|android|crios|fxios|edgios).)*safari/i.test(navigator.userAgent);
+}
+
+window.addEventListener("beforeinstallprompt", e => {
+  e.preventDefault();          // si sostituisce l'invito del browser col proprio
+  promptInstall = e;
+  aggiornaInstalla();
+  if(localStorage.getItem("rcsails_no_banner") !== "1") mostraBannerInstalla();
+});
+
+window.addEventListener("appinstalled", () => {
+  promptInstall = null;
+  installataOra = true;
+  chiudiBannerInstalla();
+  aggiornaInstalla();
+  chiediPersistenza();
+  showToast("App installata sulla schermata Home", true);
+});
+
+// ── Comando ──────────────────────────────────────────────────────────
+async function installaApp() {
+  // iOS per primo: Apple non espone l'installazione, quindi qualunque
+  // prompt presente non sarebbe comunque quello giusto.
+  if(isIOS() && !giaInstallata()) { istruzioniIOS(); return; }
+  if(promptInstall) {
+    promptInstall.prompt();
+    const esito = await promptInstall.userChoice;
+    promptInstall = null;
+    chiudiBannerInstalla();
+    aggiornaInstalla();
+    if(esito && esito.outcome === "dismissed")
+      showToast("Installazione annullata — puoi rifarla da Utilità");
+    return;
+  }
+  showToast("Il browser non offre l'installazione: usa il menù del browser");
+}
+
+function istruzioniIOS() {
+  const ov = document.createElement("div");
+  ov.className = "confirm-overlay"; ov.id = "ios-overlay";
+  ov.style.display = "flex";
+  ov.innerHTML = `<div class="confirm-box" style="max-width:360px;text-align:left">
+    <h3 style="color:var(--navy);text-align:center">Aggiungi alla schermata Home</h3>
+    ${isSafari() ? "" : `<div class="seq-avviso" style="margin:10px 0">
+      &#9888; Su iPhone solo <b>Safari</b> può installare l'app.
+      Apri questo indirizzo con Safari e riprova.</div>`}
+    <ol style="margin:12px 0 12px 18px;font-size:.9rem;line-height:1.9;color:var(--gray4)">
+      <li>Tocca <b style="color:var(--navy)">Condividi</b>
+        <span style="display:inline-block;border:1.5px solid var(--blue);color:var(--blue);
+        border-radius:5px;padding:0 6px;font-weight:700">&#8613;</span>
+        in fondo allo schermo</li>
+      <li>Scorri e tocca <b style="color:var(--navy)">Aggiungi a schermata Home</b></li>
+      <li>Conferma con <b style="color:var(--navy)">Aggiungi</b></li>
+    </ol>
+    <div class="hint">Apple non consente a una pagina di installarsi da sola:
+      questi tre passaggi vanno fatti a mano, una volta sola.</div>
+    <div class="confirm-btns"><button class="btn btn-primary"
+      onclick="document.getElementById('ios-overlay').remove()">Ho capito</button></div>
+  </div>`;
+  document.body.appendChild(ov);
+}
+
+// ── Invito discreto in fondo allo schermo ────────────────────────────
+function mostraBannerInstalla() {
+  if(document.getElementById("banner-installa") || giaInstallata()) return;
+  const b = document.createElement("div");
+  b.id = "banner-installa";
+  b.innerHTML = `
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
+    <div class="bi-txt">
+      <b>Installa sulla schermata Home</b>
+      <span>Funziona senza rete e protegge i dati di regata</span>
+    </div>
+    <button class="bi-si" onclick="installaApp()">Installa</button>
+    <button class="bi-no" onclick="rifiutaBannerInstalla()">&#10005;</button>`;
+  document.body.appendChild(b);
+  b.querySelectorAll("img.grcs-logo").forEach(el => { el.style.display = ""; el.src = LOGO; });
+}
+
+function chiudiBannerInstalla() {
+  const b = document.getElementById("banner-installa");
+  if(b) b.remove();
+}
+
+function rifiutaBannerInstalla() {
+  localStorage.setItem("rcsails_no_banner", "1");
+  chiudiBannerInstalla();
+  showToast("Puoi installarla in seguito da Setup › Utilità");
+}
+
+// ── Riquadro permanente in Utilità ───────────────────────────────────
+function aggiornaInstalla() {
+  const box = document.getElementById("installa-box");
+  if(!box) return;
+  if(giaInstallata() || installataOra) {
+    box.innerHTML = `<div class="hint" style="color:var(--green,#27AE60)">
+      &#10003; <b>App installata.</b> I dati di regata sono protetti
+      dalla cancellazione automatica.</div>`;
+    return;
+  }
+  const puo = !!promptInstall;
+  box.innerHTML = `
+    <button class="btn ${puo?"btn-gold":"btn-outline"} btn-block"
+      onclick="installaApp()" style="padding:13px">
+      &#128241; Installa sulla schermata Home</button>
+    <div class="hint">${puo
+      ? "Un tocco e l'app compare fra le altre, senza barre del browser."
+      : (isIOS()
+          ? "Su iPhone l'installazione si fa da Condividi &rsaquo; Aggiungi a schermata Home: tocca qui per i passaggi."
+          : "Se il pulsante non funziona, usa il menù del browser e cerca <i>Installa</i> o <i>Aggiungi a schermata Home</i>.")}
+      <br>Installandola, il browser conserva i dati di regata invece di
+      poterli eliminare quando lo spazio scarseggia.</div>`;
+}
+
+// Rinnova la richiesta di persistenza: installata, ha molte più probabilità
+async function chiediPersistenza() {
+  try {
+    if(navigator.storage && navigator.storage.persist) {
+      if(!(await navigator.storage.persisted())) await navigator.storage.persist();
+    }
+  } catch(e) {}
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // SEQUENZA DI PARTENZA — RRS E3.4
 //
 // "Le batterie devono essere fatte partire usando segnali di avviso,
@@ -4460,6 +4643,7 @@ document.getElementById("page-champ").addEventListener("change", e=>{
   if(e.target.id && e.target.id.indexOf("camp-")===0 && e.target.type!=="file") leggiCampConfig();
 });
 renderCamp();
+aggiornaInstalla();
 mostraSplash();
 if(!state.protests) state.protests=[];
 syncUI();
@@ -4480,7 +4664,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.17";
+const APP_VERSION = "15.18";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {

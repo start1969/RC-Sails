@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.17
+# RC Sails Scoring — v15.18
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -34,6 +34,7 @@ rc-sails/
     ├── regressione.js            22 casi di verifica del motore
     ├── sequenza-partenza.js      22 casi sulla sequenza RRS E3.4
     ├── invio-campionato.js       10 casi sull'invio delle tappe
+    ├── installazione.js          10 casi su installazione e persistenza
     └── motore.js                 motore estratto da index.html
 ```
 
@@ -74,12 +75,18 @@ Poi apri `http://localhost:8000`. Il service worker si registra anche qui.
 
 ## Installazione sul telefono
 
-**Android (Chrome)** — apri il sito, compare l'invito *Installa app*.
-Se non appare: menù ⋮ → *Aggiungi a schermata Home*.
+**Android (Chrome)** — l'app mostra da sola un invito in fondo allo schermo:
+un tocco su *Installa* e l'installazione parte. Il comando resta comunque in
+Setup › Regata › Utilità › Installazione.
 
-**iPhone/iPad (Safari)** — apri il sito, tocca *Condividi* → *Aggiungi a
-schermata Home*. **Deve essere Safari**: su iOS gli altri browser non
-possono installare app web.
+**iPhone/iPad (Safari)** — Apple non consente a una pagina di installarsi da
+sola: toccando *Installa sulla schermata Home* l'app mostra i tre passaggi
+(*Condividi* → *Aggiungi a schermata Home* → *Aggiungi*). **Deve essere Safari**:
+su iOS gli altri browser non possono installare app web.
+
+Installare non è un dettaglio estetico: è la condizione che il browser valuta
+per concedere l'**archiviazione persistente**, cioè per non eliminare i dati di
+regata quando lo spazio del dispositivo scarseggia.
 
 **Desktop (Chrome, Edge)** — icona di installazione nella barra indirizzi.
 
@@ -93,7 +100,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.17` a `rcsails-15.18`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.18` a `rcsails-15.19`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
