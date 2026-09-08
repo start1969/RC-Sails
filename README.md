@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.10
+# RC Sails Scoring — v15.13
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -91,7 +91,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.10` a `rcsails-15.11`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.13` a `rcsails-15.14`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -138,11 +138,15 @@ Da eseguire **dopo ogni modifica** alla logica di punteggio.
 
 ## Campionato su più tappe
 
-Ogni regata esporta una **Scheda Evento** (file `.rcsails`) dalla pagina
-Classifica: contiene identità dell'evento, formula di punteggio applicata e
-classifica finale, con un'impronta che rileva alterazioni manuali.
+Dalla pagina Classifica, **Invia i Dati al Campionato** aggiunge la regata come
+tappa. Se la tappa è già presente — stesso club, denominazione e data — l'app
+chiede conferma e la **aggiorna** invece di duplicarla: è il caso di una
+classifica corretta dopo una protesta.
 
-La pagina **Campionato** importa le schede e calcola la classifica di stagione.
+Per passare una regata a **un altro dispositivo** si usa invece la **Scheda
+Evento** (file `.rcsails`), che contiene identità dell'evento, formula applicata
+e classifica finale, con un'impronta che rileva alterazioni manuali. Si carica
+dalla pagina Campionato.
 Due criteri disponibili:
 
 - **Piazzamenti di tappa** — il posto conseguito vale i punti. Corretto quando

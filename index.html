@@ -58,9 +58,6 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 /* Compensazione per l'assenza di una condensata dedicata: le grottesche di
    sistema sono più larghe, quindi si stringono dove il supporto esiste. */
-#nav{overflow-x:auto;scrollbar-width:none}
-#nav::-webkit-scrollbar{display:none}
-.nav-btn{min-width:62px;font-size:.62rem;padding-left:2px;padding-right:2px}
 .nav-btn,.page-header-text h1,.header-badge,.card-header,.btn,.toggle-btn,
 .section-title,.sail-badge,.standings-table th,.net-score,.summary-card .val,
 .race-tab,.doc-club,.doc-title,.doc-sec h2,.doc-status,.doc-tab th{
@@ -82,13 +79,15 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   border-top:2px solid var(--blue);
 }
 .nav-btn{
-  flex:1;display:flex;flex-direction:column;align-items:center;
+  /* Cinque voci devono stare nella larghezza di uno schermo da 360 px */
+  flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;
   justify-content:center;gap:4px;background:none;border:none;
-  color:var(--gray3);cursor:pointer;transition:.2s;padding:8px 4px;
-  font-family:var(--font-display);font-size:.65rem;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;
+  color:var(--gray3);cursor:pointer;transition:.2s;padding:8px 1px;
+  font-family:var(--font-display);font-size:.56rem;font-weight:700;
+  letter-spacing:.01em;text-transform:uppercase;
+  overflow:hidden;white-space:nowrap;
 }
-.nav-btn .icon{font-size:1.4rem;line-height:1}
+.nav-btn .icon{font-size:1.3rem;line-height:1}
 .nav-btn.active{color:var(--gold)}
 .nav-btn.active .icon{filter:drop-shadow(0 0 6px var(--gold))}
 /* ── PAGES ── */
@@ -166,6 +165,32 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   padding:1px 6px;border-radius:10px;letter-spacing:.05em;margin-left:6px;
 }
 .code-tag{font-size:.58rem;font-weight:900;margin-left:1px}
+/* ══ COMANDI DELLA CLASSIFICA ═════════════════════════════════════ */
+.action-grid{
+  display:grid;grid-template-columns:1fr 1fr;gap:10px;
+}
+.action-btn{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:7px;min-height:104px;padding:14px 8px;border:none;cursor:pointer;
+  border-radius:var(--rr);color:#fff;box-shadow:var(--shadow);
+  font-family:var(--font-display);font-weight:800;font-size:.86rem;
+  letter-spacing:.045em;text-transform:uppercase;line-height:1.18;
+  text-align:center;transition:transform .1s ease,filter .1s ease;
+}
+.action-btn:active{transform:scale(.97);filter:brightness(1.1)}
+.action-btn .ico{font-size:1.7rem;line-height:1}
+.act-navy{background:var(--navy)}
+.act-dark{background:#0D1F3C}
+.act-blue{background:var(--blue)}
+.act-gold{background:var(--gold);color:var(--dark)}
+.action-minor{display:flex;gap:7px;margin-top:10px}
+.action-minor .mini{
+  flex:1;padding:10px 4px;border:1.5px solid var(--gray3);background:transparent;
+  border-radius:var(--r);color:var(--gray4);cursor:pointer;
+  font-family:var(--font-display);font-weight:700;font-size:.72rem;
+  letter-spacing:.03em;text-transform:uppercase;
+}
+.action-minor .mini-orange{border-color:var(--orange,#E67E22);color:var(--orange,#E67E22)}
 /* ══ AVVISO DI AVVIO ══════════════════════════════════════════════ */
 #splash{
   position:fixed;inset:0;z-index:2000;display:none;
@@ -565,7 +590,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.10</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.13</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -784,7 +809,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.10</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.13</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -856,62 +881,47 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
     </div>
     <div id="protest-table-section" style="display:none;padding:0 16px 4px"></div>
 
-    <div style="padding:0 16px 8px">
-      <button class="btn btn-block" style="background:var(--navy);color:#fff;padding:15px"
-        onclick="stampaDoc('classifica')">
-        &#128424; Classifica Ufficiale — Stampa / PDF
-      </button>
-      <div class="hint" style="text-align:center;margin-top:5px">
-        Documento per l'albo dei risultati, con codici RRS, scarti, proteste e firma.
+    <div style="padding:0 16px 10px">
+      <div class="action-grid">
+        <button class="action-btn act-navy" onclick="exportExcel()">
+          <span class="ico">&#128202;</span>
+          <span class="lab">Esporta risultati<br>in Excel</span>
+        </button>
+        <button class="action-btn act-dark" onclick="stampaDoc('classifica')">
+          <span class="ico">&#128424;</span>
+          <span class="lab">Genera classifica<br>in PDF</span>
+        </button>
+        <button class="action-btn act-gold" onclick="exportAndEmail()">
+          <span class="ico">&#9993;</span>
+          <span class="lab">Invia risultati<br>via email</span>
+        </button>
+        <button class="action-btn act-blue" onclick="inviaAlCampionato()">
+          <span class="ico">&#127942;</span>
+          <span class="lab">Invia risultati<br>al campionato</span>
+        </button>
       </div>
-    </div>
 
-    <div style="padding:0 16px 8px">
-      <button class="btn btn-block" style="background:var(--blue);color:#fff;padding:14px"
-        onclick="esportaSchedaEvento()">
-        &#128228; Esporta Scheda Evento (.rcsails)
-      </button>
-      <div class="hint" style="text-align:center;margin-top:5px">
-        Il file da caricare nel Campionato, e da passare a un altro dispositivo.
+      <div class="action-minor">
+        <button onclick="openProtests()" class="mini mini-orange">&#9878; Proteste</button>
+        <button onclick="copyStandings()" class="mini">&#128203; Copia</button>
+        <button onclick="esportaSchedaEvento()" class="mini">&#128228; Scheda .rcsails</button>
       </div>
-    </div>
-
-    <div style="padding:0 16px 4px;display:flex;gap:8px">
-      <button class="btn btn-primary" style="flex:1;font-size:.82rem" onclick="exportExcel()">
-        📊 Esporta Excel
-      </button>
-      <button class="btn btn-gold" style="flex:1;font-size:.82rem" onclick="exportAndEmail()">
-        📧 Invia Risultati
-      </button>
-    </div>
-    <div style="padding:0 16px 4px;display:flex;gap:8px">
-      <button class="btn btn-outline" style="flex:1;font-size:.82rem" onclick="copyStandings()">
-        📋 Copia Classifica
-      </button>
-      <button class="btn btn-outline" style="flex:1;font-size:.82rem;border-color:var(--teal,#117A65);color:var(--teal,#117A65)" onclick="sendToCampionato()">
-        📤 Invia a Campionato
-      </button>
-    </div>
-    <div style="padding:0 16px 4px">
-      <button class="btn btn-outline btn-block" style="font-size:.82rem;border-color:var(--orange,#E67E22);color:var(--orange,#E67E22)" onclick="openProtests()">
-        ⚖️ Gestisci Proteste
-      </button>
-    </div>
-    <div style="padding:0 16px 12px">
-      <div style="font-size:.72rem;color:var(--gray4);text-align:center;margin-top:4px">
-        📤 Invia a Campionato: copia dati negli appunti → incolla in GRCS_CAMPIONATO
+      <div class="hint" style="text-align:center;margin-top:7px">
+        <b>Campionato</b>: reinviando dopo una correzione la tappa viene aggiornata, non duplicata.<br>
+        <b>Scheda .rcsails</b>: serve solo per passare la regata a un altro dispositivo.
       </div>
     </div>
   </div>
 </div>
 
-<!-- ── ROTAZIONE ─────────────────────────────────────────────────────── -->
+<!-- ── TURNI DI GIURIA ───────────────────────────────────────────────── -->
 <div class="page" id="page-rotation">
   <div class="page-header">
-    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'" style="width:36px;height:36px">
+    <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'"
+      style="width:44px;height:44px">
     <div class="page-header-text">
       <h1>Turni di Giuria</h1>
-      <p>Round-robin automatico · Override manuale</p>
+      <p>Rotazione automatica &middot; Override manuale</p>
     </div>
   </div>
   <div class="scroll-content" style="padding:12px 0">
@@ -2302,7 +2312,7 @@ function getBoatName(sail) {
 
 function showConfirm(title,msg,onOk) {
   document.getElementById("confirm-title").textContent=title;
-  document.getElementById("confirm-msg").textContent=msg;
+  document.getElementById("confirm-msg").innerHTML=msg;
   document.getElementById("confirm-overlay").style.display="flex";
   document.getElementById("confirm-ok").onclick=()=>{closeConfirm();onOk();};
 }
@@ -2822,85 +2832,6 @@ function fallbackCopy(text) {
 // ══════════════════════════════════════════════════════════════════════
 // TRASFERIMENTO A CAMPIONATO
 // ══════════════════════════════════════════════════════════════════════
-function buildTransferPayload() {
-  const isMulti = state.config.fleet === "multi";
-  const fleets  = isMulti ? ["A","B"] : ["A"];
-  const results = [];
-
-  fleets.forEach(fl => {
-    const boats = getBoatsByFleet(fl);
-    boats.forEach(boat => {
-      const res = calcScore(boat, fl);
-      if(res.n_played === 0) return;
-
-      // Posizione nell'ultima prova disputata (per tiebreaker campionato)
-      let lastRacePos = null;
-      let lastRaceIdx = -1;
-      for(let r = state.config.races-1; r >= 0; r--) {
-        const race = state.races[r] || {};
-        const fin  = isMulti ? (fl==="A"?race.finishes_a:race.finishes_b) : race.finishes_a;
-        if(fin && fin.length > 0) { lastRaceIdx = r; break; }
-      }
-      if(lastRaceIdx >= 0) {
-        const race = state.races[lastRaceIdx];
-        const fin  = isMulti ? (fl==="A"?race.finishes_a:race.finishes_b) : race.finishes_a;
-        const pos  = (fin||[]).indexOf(boat.sail);
-        lastRacePos = pos >= 0 ? pos+1 : (fin||[]).length + 1; // assente = DNS
-      }
-
-      results.push({
-        sail:       boat.sail,
-        name:       boat.name,
-        fleet:      fl,
-        net:        res.net,
-        gross:      res.gross,
-        disc:       res.disc,
-        n_played:   res.n_played,
-        last_race_pos: lastRacePos
-      });
-    });
-  });
-
-  return {
-    type:     "grcs_regata_v1",
-    name:     state.config.name,
-    date:     state.config.date,
-    races:    state.config.races,
-    n_played: state.races.filter(r=>(r.finishes_a||[]).length>0).length,
-    fleet:    state.config.fleet,
-    results,
-    protests: (state.protests||[]).map(p=>({
-      raceIdx: p.raceIdx,
-      from:    p.from,
-      to:      p.to,
-      rule:    p.rule||"",
-      outcome: p.outcome,
-      notes:   p.notes||""
-    }))
-  };
-}
-
-function sendToCampionato() {
-  if(!state.boats.length){ toast("⚠ Nessun partecipante"); return; }
-  const payload = buildTransferPayload();
-  if(!payload.results.length){ toast("⚠ Nessun risultato da inviare"); return; }
-  const json = JSON.stringify(payload);
-  if(navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(json).then(() => {
-      showToast("📤 Dati copiati! Apri GRCS_CAMPIONATO e premi 'Incolla da Regata'", true);
-    }).catch(() => fallbackCopy(json));
-  } else {
-    fallbackCopy(json);
-    showToast("📤 Dati copiati negli appunti!", true);
-  }
-}
-
-
-// ══════════════════════════════════════════════════════════════════════
-// GESTIONE PROTESTE
-// ══════════════════════════════════════════════════════════════════════
-// state.protests = [{id, raceIdx, sail, outcome:"pending"|"dsq"|"dismissed", notes}]
-
 function openProtests() {
   if(!state.boats.length){ showToast("\u26A0 Nessun partecipante"); return; }
   const played=[];
@@ -3587,7 +3518,67 @@ function esportaSchedaEvento() {
   showToast("Scheda evento esportata", true);
 }
 
-// ── Importazione nel campionato ──────────────────────────────────────
+// ── Identità di una tappa ────────────────────────────────────────────
+// Non è l'impronta del contenuto: quella cambia se correggi una protesta.
+// Una tappa è identificata da club, denominazione e data.
+function chiaveTappa(s) {
+  return [s.evento.club||"", s.evento.nome||"", s.evento.data||""]
+    .join("|").trim().toLowerCase();
+}
+
+// Inserisce o sostituisce una tappa. Se già presente chiede conferma,
+// così una correzione aggiorna invece di duplicare.
+function aggiungiTappa(s, dopo) {
+  const k = chiaveTappa(s);
+  const i = camp.eventi.findIndex(e => chiaveTappa(e) === k);
+
+  const inserisci = () => {
+    if(i >= 0) camp.eventi[i] = s; else camp.eventi.push(s);
+    camp.eventi.sort((a,b)=>(a.evento.data||"").localeCompare(b.evento.data||""));
+    if(!camp.config.nome && s.evento.nome) camp.config.nome = s.evento.nome;
+    if(!camp.config.club)   camp.config.club   = s.evento.club || "";
+    if(!camp.config.classe) camp.config.classe = s.evento.classe || "";
+    salvaCamp(); renderCamp();
+    if(dopo) dopo(i >= 0);
+  };
+
+  if(i < 0) { inserisci(); return; }
+
+  const vecchia = camp.eventi[i];
+  const cambiata = vecchia.impronta !== s.impronta;
+  showConfirm("Tappa già presente",
+    `"${esc(s.evento.nome)}" del ${dataBreve(s.evento.data)} è già in campionato `
+    + `con ${vecchia.risultati.length} classificati.<br><br>`
+    + (cambiata ? "<b>La classifica è diversa da quella salvata.</b> "
+               : "La classifica è identica a quella salvata. ")
+    + "Vuoi sostituirla con quella attuale?",
+    inserisci);
+}
+
+// ── Invio diretto dalla regata in corso ──────────────────────────────
+function inviaAlCampionato() {
+  if(!state.boats.length) { showToast("Nessun partecipante nella regata"); return; }
+  const s = creaSchedaEvento();
+  if(!s.risultati.length) { showToast("Nessun risultato da inviare"); return; }
+  if(!s.evento.nome || !s.evento.data) {
+    showToast("Indica nome regata e data nel Setup prima di inviare"); return;
+  }
+  // Avvisi di coerenza con il campionato già impostato
+  const av = [];
+  if(camp.config.classe && s.evento.classe && camp.config.classe !== s.evento.classe)
+    av.push(`classe ${s.evento.classe} diversa da ${camp.config.classe}`);
+  if(camp.config.club && s.evento.club && camp.config.club !== s.evento.club)
+    av.push(`club diverso da ${camp.config.club}`);
+
+  aggiungiTappa(s, sostituita => {
+    showToast(sostituita ? "Tappa aggiornata in campionato"
+                         : (av.length ? "Tappa aggiunta — " + av.join(", ")
+                                      : "Tappa aggiunta al campionato"), !av.length);
+    if(!av.length && !sostituita) setTimeout(()=>navigate("champ"), 700);
+  });
+}
+
+// ── Importazione da file ─────────────────────────────────────────────
 function importaSchedaEvento(input) {
   const file = input.files && input.files[0];
   if(!file) return;
@@ -3606,23 +3597,17 @@ function importaSchedaEvento(input) {
     const atteso = impronta(copia);
     s.alterata = (s.impronta && s.impronta !== atteso);
 
-    if(camp.eventi.some(e => e.id === s.id)) {
-      showToast("Questa tappa è già stata importata"); input.value=""; return;
-    }
     // Avvisi di coerenza, non blocchi: la decisione resta al segretario
     const avvisi = [];
     if(camp.config.classe && s.evento.classe && camp.config.classe !== s.evento.classe)
       avvisi.push(`classe ${s.evento.classe} diversa da ${camp.config.classe}`);
     if(s.alterata) avvisi.push("impronta di integrità non corrispondente");
 
-    camp.eventi.push(s);
-    camp.eventi.sort((a,b)=>(a.evento.data||"").localeCompare(b.evento.data||""));
-    if(!camp.config.nome && s.evento.nome) camp.config.nome = s.evento.nome;
-    if(!camp.config.club) camp.config.club = s.evento.club || "";
-    if(!camp.config.classe) camp.config.classe = s.evento.classe || "";
-    salvaCamp(); renderCamp();
-    showToast(avvisi.length ? "Tappa importata — " + avvisi.join(", ")
-                            : "Tappa importata: " + s.evento.nome, !avvisi.length);
+    aggiungiTappa(s, sostituita => {
+      showToast(avvisi.length ? "Tappa importata — " + avvisi.join(", ")
+        : (sostituita ? "Tappa aggiornata: " + s.evento.nome
+                      : "Tappa importata: " + s.evento.nome), !avvisi.length);
+    });
     input.value = "";
   };
   fr.readAsText(file);
@@ -3632,7 +3617,7 @@ function rimuoviTappa(id) {
   const e = camp.eventi.find(x=>x.id===id);
   if(!e) return;
   showConfirm("Rimuovere la tappa?",
-    `"${e.evento.nome}" del ${dataBreve(e.evento.data)} sarà tolta dal campionato. `
+    `"${esc(e.evento.nome)}" del ${dataBreve(e.evento.data)} sarà tolta dal campionato. `
     + "Il file della scheda evento resta sul dispositivo.",
     () => { camp.eventi = camp.eventi.filter(x=>x.id!==id); salvaCamp(); renderCamp(); });
 }
@@ -3997,7 +3982,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.10";
+const APP_VERSION = "15.13";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {

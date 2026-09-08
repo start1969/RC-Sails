@@ -8,7 +8,7 @@
    condizione normale su un campo di regata.
    ══════════════════════════════════════════════════════════════════════ */
 
-const VERSIONE = 'rcsails-15.10';
+const VERSIONE = 'rcsails-15.13';
 const CACHE    = `rcsails-scoring-${VERSIONE}`;
 
 // Tutto ciò che serve per funzionare offline.
