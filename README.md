@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.13
+# RC Sails Scoring — v15.16
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -32,6 +32,8 @@ rc-sails/
 │   └── LICENSE-Apache-2.0.txt    licenza della libreria SheetJS
 └── test/
     ├── regressione.js            22 casi di verifica del motore
+    ├── sequenza-partenza.js      17 casi sulla sequenza RRS E3.4
+    ├── invio-campionato.js       10 casi sull'invio delle tappe
     └── motore.js                 motore estratto da index.html
 ```
 
@@ -91,7 +93,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.13` a `rcsails-15.14`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.16` a `rcsails-15.17`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -135,6 +137,23 @@ verificato.
 Da eseguire **dopo ogni modifica** alla logica di punteggio.
 
 ---
+
+## Sequenza di partenza
+
+Dalla pagina Arrivi, il comando **Partenza** apre la procedura sonora conforme
+alla **RRS E3.4**: segnali di avviso, preparatorio e partenza a intervalli di un
+minuto, un segnale ogni dieci secondi nell'ultimo minuto, uno al secondo negli
+ultimi dieci, e la tromba al via.
+
+I suoni sono sintetizzati — nessun file audio — e sono programmati in anticipo
+sull'orologio della scheda audio, non con un timer: non derivano e non si
+bloccano se il browser rallenta. Lo schermo resta acceso per tutta la procedura.
+
+Due durate: **2 minuti** — la sequenza regolamentare, predefinita — e **1 minuto**,
+ridotta, che va dichiarata nelle Istruzioni di Regata perché omette il segnale di
+avviso. È previsto anche il **richiamo generale** con i due suoni della RRS E3.6.
+
+Sul telefono: alzare il volume e, su iPhone, disattivare la suoneria silenziosa.
 
 ## Campionato su più tappe
 

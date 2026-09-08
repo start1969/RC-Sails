@@ -165,6 +165,28 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   padding:1px 6px;border-radius:10px;letter-spacing:.05em;margin-left:6px;
 }
 .code-tag{font-size:.58rem;font-weight:900;margin-left:1px}
+/* ══ SCHEDE INTERNE DELLA CONFIGURAZIONE ═════════════════════════ */
+.subtabs{
+  display:flex;gap:0;background:var(--white);flex-shrink:0;
+  border-bottom:1px solid var(--gray2);box-shadow:0 1px 4px rgba(13,31,60,.06);
+  position:sticky;top:0;z-index:8;
+}
+.subtab{
+  flex:1 1 0;min-width:0;padding:13px 4px 11px;border:none;background:none;
+  cursor:pointer;color:var(--gray4);border-bottom:3px solid transparent;
+  font-family:var(--font-display);font-weight:700;font-size:.82rem;
+  letter-spacing:.05em;text-transform:uppercase;transition:.15s;
+  white-space:nowrap;overflow:hidden;
+}
+.subtab.active{color:var(--navy);border-bottom-color:var(--gold)}
+.subtab-badge{
+  display:inline-block;background:var(--navy);color:var(--white);
+  border-radius:20px;padding:1px 7px;font-size:.68rem;margin-left:3px;
+  vertical-align:middle;
+}
+.subtab.active .subtab-badge{background:var(--gold);color:var(--dark)}
+.subpanel{display:none}
+.subpanel.active{display:block}
 /* ══ COMANDI DELLA CLASSIFICA ═════════════════════════════════════ */
 .action-grid{
   display:grid;grid-template-columns:1fr 1fr;gap:10px;
@@ -191,6 +213,70 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   letter-spacing:.03em;text-transform:uppercase;
 }
 .action-minor .mini-orange{border-color:var(--orange,#E67E22);color:var(--orange,#E67E22)}
+/* ══ SEQUENZA DI PARTENZA ═════════════════════════════════════════ */
+#seq-overlay{
+  position:fixed;inset:0;z-index:1900;display:none;
+  align-items:center;justify-content:center;padding:20px;
+  background:rgba(13,31,60,.94);backdrop-filter:blur(4px);
+}
+.seq-box{
+  background:var(--white);border-radius:var(--rr);padding:26px 22px 18px;
+  max-width:400px;width:100%;text-align:center;box-shadow:var(--shadow-lg);
+  transition:background .25s ease;
+}
+.seq-box.seq-prep{background:#FFF8E6}
+.seq-box.seq-finale{background:#FCEDEA}
+.seq-box.seq-via{background:#E9F7EE}
+.seq-titolo{
+  font-family:var(--font-display);font-weight:900;font-size:1.5rem;
+  color:var(--navy);letter-spacing:.05em;text-transform:uppercase;
+}
+.seq-prova{font-size:.82rem;color:var(--gray4);margin:4px 0 16px}
+.seq-campo{text-align:left;margin-bottom:12px}
+.seq-campo label{
+  display:block;font-size:.7rem;font-weight:700;color:var(--gray4);
+  text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;
+}
+.seq-scelta{display:flex;gap:8px}
+.seq-opt{
+  flex:1;padding:13px 8px;border:2px solid var(--gray2);background:var(--white);
+  border-radius:var(--r);cursor:pointer;text-align:center;transition:.15s;
+}
+.seq-opt.active{border-color:var(--navy);background:#F0F3F9}
+.seq-opt-t{
+  display:block;font-family:var(--font-display);font-weight:900;font-size:1.15rem;
+  color:var(--gray4);letter-spacing:.03em;
+}
+.seq-opt.active .seq-opt-t{color:var(--navy)}
+.seq-opt-s{display:block;font-size:.66rem;color:var(--gray4);margin-top:3px;line-height:1.3}
+.seq-nota{font-size:.72rem;color:var(--gray4);line-height:1.5;text-align:left;margin-bottom:10px}
+.seq-avviso{
+  font-size:.72rem;color:#8A6D1E;background:#FFF8E6;border-left:3px solid var(--gold);
+  border-radius:0 var(--r) var(--r) 0;padding:9px 11px;text-align:left;
+  line-height:1.45;margin-bottom:16px;
+}
+.seq-num{
+  font-family:var(--font-display);font-weight:900;font-size:7rem;
+  line-height:1;color:var(--navy);font-variant-numeric:tabular-nums;
+  margin:6px 0 2px;
+}
+.seq-box.seq-finale .seq-num{color:var(--red)}
+.seq-box.seq-via .seq-num{color:var(--green)}
+.seq-fase{
+  font-family:var(--font-display);font-weight:700;font-size:.9rem;
+  letter-spacing:.07em;text-transform:uppercase;color:var(--gray4);margin-bottom:18px;
+}
+.seq-richiamo{
+  width:100%;padding:12px;border:2px solid var(--red);background:transparent;
+  color:var(--red);border-radius:var(--r);cursor:pointer;
+  font-family:var(--font-display);font-weight:800;font-size:.82rem;
+  letter-spacing:.04em;text-transform:uppercase;
+}
+.seq-chiudi{
+  width:100%;margin-top:10px;padding:11px;border:none;background:none;
+  color:var(--gray4);cursor:pointer;font-family:var(--font-display);
+  font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;
+}
 /* ══ AVVISO DI AVVIO ══════════════════════════════════════════════ */
 #splash{
   position:fixed;inset:0;z-index:2000;display:none;
@@ -586,11 +672,58 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <body>
 <div id="print-area"></div>
 
+<!-- ── SEQUENZA DI PARTENZA ─────────────────────────────────────── -->
+<div id="seq-overlay">
+  <div class="seq-box" id="seq-box">
+
+    <div id="seq-setup">
+      <div class="seq-titolo">Sequenza di Partenza</div>
+      <div class="seq-prova" id="seq-prova"></div>
+      <div class="seq-campo">
+        <label>Durata della sequenza</label>
+        <input type="hidden" id="seq-durata" value="120">
+        <div class="seq-scelta">
+          <button class="seq-opt" id="seq-opt-60" onclick="setDurataSeq(60)">
+            <span class="seq-opt-t">1 minuto</span>
+            <span class="seq-opt-s">preparatorio e partenza</span>
+          </button>
+          <button class="seq-opt active" id="seq-opt-120" onclick="setDurataSeq(120)">
+            <span class="seq-opt-t">2 minuti</span>
+            <span class="seq-opt-s">avviso, preparatorio, partenza</span>
+          </button>
+        </div>
+      </div>
+      <div class="seq-nota" id="seq-nota">
+        Sequenza della <b>RRS E3.4</b>: segnali a intervalli di un minuto.
+        Nell'ultimo minuto un segnale ogni dieci secondi, e negli ultimi dieci
+        secondi uno al secondo. Ogni segnale è conteggiato dall'inizio del suono.
+      </div>
+      <div class="seq-avviso">
+        &#9888; Alza il volume e tieni lo schermo acceso. Su iPhone disattiva
+        la suoneria silenziosa.
+      </div>
+      <button class="btn btn-gold btn-block" style="padding:16px;font-size:1.05rem"
+        onclick="avviaSequenza()">&#9654; Avvia la Sequenza</button>
+      <button class="seq-chiudi" onclick="chiudiSequenza()">Chiudi</button>
+    </div>
+
+    <div id="seq-run" style="display:none">
+      <div class="seq-num" id="seq-num">—</div>
+      <div class="seq-fase" id="seq-fase"></div>
+      <button class="seq-richiamo" onclick="richiamoGenerale()">
+        &#128227; Richiamo generale — due suoni (E3.6)</button>
+    </div>
+
+    <button class="seq-chiudi" id="seq-annulla" style="display:none"
+      onclick="chiudiSequenza()">Interrompi</button>
+  </div>
+</div>
+
 <!-- ── Avviso di avvio ──────────────────────────────────────────── -->
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.13</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.16</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -615,7 +748,16 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       <p class="brand-sub">Punteggi di regata — vela radiocomandata</p>
     </div>
   </div>
+  <div class="subtabs">
+    <button class="subtab active" id="st-regata"    onclick="setupTab('regata')">Regata</button>
+    <button class="subtab"        id="st-punteggio" onclick="setupTab('punteggio')">Punteggio</button>
+    <button class="subtab"        id="st-skippers"  onclick="setupTab('skippers')">
+      Skippers <span class="subtab-badge" id="skipper-count">0</span>
+    </button>
+  </div>
+
   <div class="scroll-content">
+    <div class="subpanel active" id="panel-regata">
     <div class="section-title">Evento</div>
     <div class="card">
       <div class="card-body">
@@ -638,7 +780,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
           </div>
           <div class="field">
             <label>Club</label>
-            <input type="text" id="cfg-club" placeholder="Sigla o nome del circolo">
+            <input type="text" id="cfg-club" placeholder="Sigla del circolo">
           </div>
         </div>
         <div class="field">
@@ -703,6 +845,60 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       </div>
     </div>
 
+    <div class="section-title">Utilità</div>
+    <div class="card">
+      <div class="card-body">
+        <div class="sub-head">Importa regata da Excel</div>
+        <div onclick="document.getElementById('import-xl-inp').click()"
+          style="border:2px dashed var(--gray3);border-radius:var(--r);padding:18px;
+          text-align:center;cursor:pointer;background:var(--gray1)">
+          <div style="font-size:1.6rem;margin-bottom:6px">&#128193;</div>
+          <div style="font-size:.85rem;color:var(--gray4)"><strong>Carica un file .xlsx esportato dall'app</strong><br>
+            Importa arrivi e partecipanti da un file esportato</div>
+          <input type="file" id="import-xl-inp" accept=".xlsx" style="display:none" onchange="importFromXlsx(this)">
+        </div>
+        <div id="import-xl-preview" style="margin-top:8px"></div>
+        <div class="sub-head">Documenti</div>
+        <button class="btn btn-outline btn-block" onclick="stampaDoc('idr')">
+          &#9878; Estratto Istruzioni di Regata
+        </button>
+        <div class="hint">
+          Genera una pagina che descrive il sistema di punteggio impostato, con i
+          riferimenti di regola. Da affiggere insieme alla classifica.
+        </div>
+
+        <div class="sub-head">Informazioni</div>
+        <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
+          <b style="color:var(--navy);font-family:var(--font-display);
+             font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
+          <span id="app-ver" style="color:var(--gray3)">v15.16</span><br>
+          Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
+          <span style="display:block;margin-top:6px">
+            &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
+            Codice, grafica e progettazione sono opera protetta dal diritto
+            d'autore. Riproduzione e distribuzione vietate senza
+            autorizzazione scritta.
+          </span>
+          <span style="display:block;margin-top:6px;color:var(--gray3)">
+            Include SheetJS CE (Apache 2.0) per l'esportazione Excel.<br>
+            Nessun dato lascia questo dispositivo.
+          </span>
+        </div>
+
+        <div class="sub-head">Azzeramento</div>
+        <button onclick="newRegata()" style="width:100%;padding:13px;border:2px solid var(--red);
+          border-radius:var(--r);background:transparent;color:var(--red);
+          font-family:var(--font-display);font-weight:900;font-size:1rem;
+          cursor:pointer;letter-spacing:.06em;text-transform:uppercase">
+          &#128465; Nuova Regata — Azzera Dati</button>
+        <div class="hint" style="text-align:center">
+          Cancella arrivi, barche, penalità e proteste. Mantiene la configurazione.</div>
+      </div>
+    </div>
+    <div style="height:20px"></div>
+    </div>
+
+    <div class="subpanel" id="panel-punteggio">
     <div class="section-title">Punteggio</div>
     <div class="alert alert-info">
       <span>&#9878;</span>
@@ -751,7 +947,10 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       </div>
     </div>
 
-    <div class="section-title">Partecipanti <span id="boat-count-badge" style="background:var(--navy);color:var(--white);padding:2px 8px;border-radius:20px;font-size:.7rem">0</span></div>
+    </div>
+
+    <div class="subpanel" id="panel-skippers">
+    <div style="display:none"><span id="boat-count-badge">0</span></div>
     <div class="alert alert-info">
       <span>ℹ️</span><span>Inserisci i partecipanti prima di iniziare le prove. Il numero velico deve essere univoco.</span>
     </div>
@@ -759,7 +958,8 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       <div class="card-body">
         <div style="display:flex;gap:8px;margin-bottom:12px">
           <div style="flex:1" class="field" style="margin:0">
-            <input type="text" id="new-sail" placeholder="N° Velico" style="text-align:center;font-family:var(--font-display);font-weight:900;font-size:1.2rem" maxlength="6">
+            <input type="text" id="new-sail" placeholder="Velico" inputmode="numeric"
+              style="text-align:center;font-family:var(--font-display);font-weight:900;font-size:1.1rem" maxlength="6">
           </div>
           <div style="flex:2" class="field" style="margin:0">
             <input type="text" id="new-name" placeholder="Nome Skipper">
@@ -777,63 +977,15 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
     <div class="card" id="boat-list-card" style="display:none">
       <div class="card-body" id="boat-list"></div>
     </div>
+    </div>
+
     <div style="padding:0 16px 16px">
       <button class="btn btn-gold btn-block" onclick="goToRacing()" style="padding:16px">
         &#127937; Inizia Regata &rarr;
       </button>
     </div>
 
-    <div class="section-title">Utilità</div>
-    <div class="card">
-      <div class="card-body">
-        <div class="sub-head">Importa regata da Excel</div>
-        <div onclick="document.getElementById('import-xl-inp').click()"
-          style="border:2px dashed var(--gray3);border-radius:var(--r);padding:18px;
-          text-align:center;cursor:pointer;background:var(--gray1)">
-          <div style="font-size:1.6rem;margin-bottom:6px">&#128193;</div>
-          <div style="font-size:.85rem;color:var(--gray4)"><strong>Carica un file .xlsx esportato dall'app</strong><br>
-            Importa arrivi e partecipanti da un file esportato</div>
-          <input type="file" id="import-xl-inp" accept=".xlsx" style="display:none" onchange="importFromXlsx(this)">
-        </div>
-        <div id="import-xl-preview" style="margin-top:8px"></div>
-        <div class="sub-head">Documenti</div>
-        <button class="btn btn-outline btn-block" onclick="stampaDoc('idr')">
-          &#9878; Estratto Istruzioni di Regata
-        </button>
-        <div class="hint">
-          Genera una pagina che descrive il sistema di punteggio impostato, con i
-          riferimenti di regola. Da affiggere insieme alla classifica.
-        </div>
-
-        <div class="sub-head">Informazioni</div>
-        <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
-          <b style="color:var(--navy);font-family:var(--font-display);
-             font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.13</span><br>
-          Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
-          <span style="display:block;margin-top:6px">
-            &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
-            Codice, grafica e progettazione sono opera protetta dal diritto
-            d'autore. Riproduzione e distribuzione vietate senza
-            autorizzazione scritta.
-          </span>
-          <span style="display:block;margin-top:6px;color:var(--gray3)">
-            Include SheetJS CE (Apache 2.0) per l'esportazione Excel.<br>
-            Nessun dato lascia questo dispositivo.
-          </span>
-        </div>
-
-        <div class="sub-head">Azzeramento</div>
-        <button onclick="newRegata()" style="width:100%;padding:13px;border:2px solid var(--red);
-          border-radius:var(--r);background:transparent;color:var(--red);
-          font-family:var(--font-display);font-weight:900;font-size:1rem;
-          cursor:pointer;letter-spacing:.06em;text-transform:uppercase">
-          &#128465; Nuova Regata — Azzera Dati</button>
-        <div class="hint" style="text-align:center">
-          Cancella arrivi, barche, penalità e proteste. Mantiene la configurazione.</div>
-      </div>
-    </div>
-    <div style="height:20px"></div>
+    <div style="height:16px"></div>
   </div>
 </div>
 
@@ -845,7 +997,13 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       <h1 id="race-header-title">Ordine di Arrivo</h1>
       <p id="race-header-sub">Seleziona la prova</p>
     </div>
-    <div class="header-badge" id="race-status-badge">—</div>
+    <button onclick="apriSequenza()" title="Sequenza di partenza"
+      style="margin-left:auto;background:var(--gold);color:var(--dark);border:none;
+      border-radius:var(--r);padding:9px 12px;cursor:pointer;flex-shrink:0;
+      font-family:var(--font-display);font-weight:900;font-size:.78rem;
+      letter-spacing:.05em;text-transform:uppercase;line-height:1.1">
+      &#9201;<br>Partenza</button>
+    <div class="header-badge" id="race-status-badge" style="margin-left:8px">—</div>
   </div>
   <div class="race-tabs" id="race-tabs"></div>
   <div class="scroll-content" id="race-content">
@@ -1298,6 +1456,18 @@ function normalizeState(s) {
 }
 
 // Legge la schermata di configurazione dentro lo stato
+// Schede interne della configurazione: Regata, Punteggio, Skippers
+function setupTab(nome) {
+  ["regata","punteggio","skippers"].forEach(t => {
+    const p = document.getElementById("panel-"+t);
+    const b = document.getElementById("st-"+t);
+    if(p) p.classList.toggle("active", t===nome);
+    if(b) b.classList.toggle("active", t===nome);
+  });
+  const sc = document.querySelector("#page-setup .scroll-content");
+  if(sc) sc.scrollTop = 0;
+}
+
 function readConfig() {
   const v = id => { const el=document.getElementById(id); return el ? el.value : ""; };
   const c = state.config;
@@ -1443,6 +1613,8 @@ function renderBoatList() {
   const card = document.getElementById("boat-list-card");
   const count = document.getElementById("boat-count-badge");
   count.textContent = state.boats.length;
+  const sb = document.getElementById("skipper-count");
+  if(sb) sb.textContent = state.boats.length;
   if(!state.boats.length) { card.style.display="none"; return; }
   card.style.display="block";
   const isMulti = (state.config.fleet||fleetMode)==="multi";
@@ -3395,6 +3567,210 @@ function stampaDoc(tipo) {
 
 
 // ══════════════════════════════════════════════════════════════════════
+// SEQUENZA DI PARTENZA — RRS E3.4
+//
+// "Le batterie devono essere fatte partire usando segnali di avviso,
+//  preparatorio e di partenza a intervalli di un minuto. Durante il minuto
+//  precedente il segnale di partenza devono essere emessi ulteriori segnali
+//  sonori o vocali a intervalli di dieci secondi, e durante gli ultimi
+//  dieci secondi a intervalli di un secondo. Ogni segnale è conteggiato
+//  dall'inizio del suo suono."
+//
+// Nota tecnica: i suoni NON sono governati da setInterval, che deriva e si
+// blocca quando il browser mette la scheda in secondo piano. Sono tutti
+// programmati in anticipo sull'orologio della scheda audio, che è
+// campione-accurato. Il conto alla rovescia a schermo legge lo stesso
+// orologio, così numeri e suoni non possono divergere.
+// ══════════════════════════════════════════════════════════════════════
+
+let ac = null;              // contesto audio
+let seqT0 = 0;              // istante del segnale di partenza, in tempo audio
+let seqTimer = null;        // handle del ciclo di disegno
+let seqDurata = 120;        // secondi dal primo segnale alla partenza
+let seqWakeLock = null;     // per tenere lo schermo acceso
+
+function audioCtx() {
+  if(!ac) {
+    const C = window.AudioContext || window.webkitAudioContext;
+    if(!C) return null;
+    ac = new C();
+  }
+  if(ac.state === "suspended") ac.resume();
+  return ac;
+}
+
+// ── Generazione dei suoni ────────────────────────────────────────────
+// Nessun file audio: le tonalità sono sintetizzate, così il pacchetto
+// resta leggero e funziona senza rete.
+function tono(t, freq, durata, volume, tipo) {
+  const c = audioCtx(); if(!c) return;
+  const osc = c.createOscillator(), g = c.createGain();
+  osc.type = tipo || "square";
+  osc.frequency.setValueAtTime(freq, t);
+  // Attacco e rilascio brevi: evitano il "click" a inizio e fine nota
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(volume, t + 0.008);
+  g.gain.setValueAtTime(volume, t + durata - 0.05);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + durata);
+  osc.connect(g); g.connect(c.destination);
+  osc.start(t); osc.stop(t + durata + 0.02);
+}
+
+// Tromba di partenza: due oscillatori leggermente scordati filtrati passa-basso
+function tromba(t, durata) {
+  const c = audioCtx(); if(!c) return;
+  const g = c.createGain(), f = c.createBiquadFilter();
+  f.type = "lowpass"; f.frequency.setValueAtTime(1800, t);
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+  g.gain.setValueAtTime(0.5, t + durata - 0.18);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + durata);
+  [233, 234.5, 350].forEach((fr, i) => {
+    const o = c.createOscillator();
+    o.type = i === 2 ? "sine" : "sawtooth";
+    o.frequency.setValueAtTime(fr, t);
+    o.connect(f); o.start(t); o.stop(t + durata + 0.05);
+  });
+  f.connect(g); g.connect(c.destination);
+}
+
+const beepBreve  = t => tono(t, 880,  0.12, 0.35);
+const beepDecina = t => tono(t, 660,  0.18, 0.32);
+const segnale    = t => tono(t, 990,  0.55, 0.40, "triangle");
+
+// ── Costruzione della sequenza ───────────────────────────────────────
+// Restituisce l'elenco dei momenti, in secondi PRIMA della partenza.
+function eventiSequenza(durata) {
+  const ev = [];
+  // Segnali a intervalli di un minuto: avviso, preparatorio, partenza
+  for(let m = Math.floor(durata/60); m >= 1; m--) {
+    const s = m*60;
+    if(s > durata) continue;
+    // Il segnale a un minuto dalla partenza è sempre il preparatorio
+    // (regola 26); quello in testa alla sequenza è l'avviso.
+    ev.push({ s, tipo:"segnale",
+      testo: s === 60 ? "PREPARATORIO" : (s === durata ? "AVVISO" : "SEGNALE") });
+  }
+  // Nel minuto precedente: ogni dieci secondi
+  [50,40,30,20].forEach(s => { if(s < durata) ev.push({ s, tipo:"decina", testo:"" }); });
+  // Negli ultimi dieci secondi: ogni secondo
+  for(let s = 10; s >= 1; s--) if(s < durata) ev.push({ s, tipo:"secondo", testo:"" });
+  ev.push({ s:0, tipo:"partenza", testo:"PARTENZA" });
+  return ev.sort((a,b) => b.s - a.s);
+}
+
+function setDurataSeq(sec) {
+  document.getElementById("seq-durata").value = sec;
+  [60,120].forEach(s => {
+    const b = document.getElementById("seq-opt-"+s);
+    if(b) b.classList.toggle("active", s === sec);
+  });
+  const nota = document.getElementById("seq-nota");
+  if(nota) nota.innerHTML = sec === 120
+    ? "Sequenza della <b>RRS E3.4</b>: segnali a intervalli di un minuto. "
+      + "Nell'ultimo minuto un segnale ogni dieci secondi, e negli ultimi dieci "
+      + "secondi uno al secondo. Ogni segnale è conteggiato dall'inizio del suono."
+    : "Sequenza ridotta: un solo segnale preparatorio a un minuto dalla partenza, "
+      + "poi un segnale ogni dieci secondi e uno al secondo negli ultimi dieci. "
+      + "La <b>RRS E3.4</b> prevede anche il segnale di avviso: se la usi, "
+      + "dichiarala nelle Istruzioni di Regata.";
+}
+
+// ── Avvio ────────────────────────────────────────────────────────────
+async function avviaSequenza() {
+  const c = audioCtx();
+  if(!c) { showToast("Audio non disponibile su questo dispositivo"); return; }
+
+  seqDurata = parseInt(document.getElementById("seq-durata").value) || 120;
+  const ev = eventiSequenza(seqDurata);
+  // Mezzo secondo di margine: il primo segnale non deve cadere nell'istante
+  // in cui il contesto audio si sta ancora avviando.
+  seqT0 = c.currentTime + 0.5 + seqDurata;
+
+  ev.forEach(e => {
+    const t = seqT0 - e.s;
+    if(e.tipo === "segnale")  segnale(t);
+    if(e.tipo === "decina")   beepDecina(t);
+    if(e.tipo === "secondo")  beepBreve(t);
+    if(e.tipo === "partenza") tromba(t, 1.6);
+  });
+
+  document.getElementById("seq-setup").style.display = "none";
+  document.getElementById("seq-run").style.display = "block";
+  document.getElementById("seq-annulla").style.display = "block";
+
+  // Lo schermo non deve spegnersi durante la procedura
+  try {
+    if(navigator.wakeLock) seqWakeLock = await navigator.wakeLock.request("screen");
+  } catch(e) {}
+
+  disegnaSequenza();
+}
+
+function disegnaSequenza() {
+  const c = audioCtx(); if(!c) return;
+  const rimasti = seqT0 - c.currentTime;
+  const num = document.getElementById("seq-num");
+  const fase = document.getElementById("seq-fase");
+  const box = document.getElementById("seq-box");
+
+  if(rimasti <= -3) { chiudiSequenza(); return; }
+
+  if(rimasti <= 0) {
+    num.textContent = "VIA!";
+    num.style.fontSize = "4.2rem";
+    fase.textContent = "Prova avviata";
+    box.className = "seq-box seq-via";
+  } else {
+    const s = Math.ceil(rimasti);
+    if(s > 60) {
+      num.textContent = Math.floor(s/60) + ":" + String(s%60).padStart(2,"0");
+      num.style.fontSize = "5rem";
+    } else {
+      num.textContent = s;
+      num.style.fontSize = s <= 10 ? "9rem" : "7rem";
+    }
+    fase.textContent = s > 60 ? "Segnale di avviso dato"
+                     : s > 10 ? "Minuto preparatorio"
+                     : "Ultimi dieci secondi";
+    box.className = "seq-box" + (s <= 10 ? " seq-finale" : s <= 60 ? " seq-prep" : "");
+    // Vibrazione negli ultimi dieci secondi, dove serve davvero
+    if(s <= 10 && navigator.vibrate && s !== window.__ultimoVib) {
+      window.__ultimoVib = s; navigator.vibrate(s === 1 ? 220 : 60);
+    }
+  }
+  seqTimer = requestAnimationFrame(disegnaSequenza);
+}
+
+// ── Richiamo generale — RRS E3.6: due suoni forti ────────────────────
+function richiamoGenerale() {
+  const c = audioCtx(); if(!c) return;
+  const t = c.currentTime + 0.05;
+  tromba(t, 0.7); tromba(t + 0.95, 0.7);
+  showToast("Richiamo generale — due suoni (RRS E3.6)");
+}
+
+function apriSequenza() {
+  document.getElementById("seq-overlay").style.display = "flex";
+  document.getElementById("seq-setup").style.display = "block";
+  document.getElementById("seq-run").style.display = "none";
+  document.getElementById("seq-annulla").style.display = "none";
+  const p = state.races[currentRace];
+  setDurataSeq(parseInt(document.getElementById("seq-durata").value) || 120);
+  document.getElementById("seq-prova").textContent =
+    "Prova " + (currentRace + 1) + (p && p.confirmed ? " — già confermata" : "");
+}
+
+function chiudiSequenza() {
+  if(seqTimer) { cancelAnimationFrame(seqTimer); seqTimer = null; }
+  if(seqWakeLock) { try { seqWakeLock.release(); } catch(e) {} seqWakeLock = null; }
+  // Si chiude il contesto per zittire i suoni ancora programmati
+  if(ac) { try { ac.close(); } catch(e) {} ac = null; }
+  window.__ultimoVib = null;
+  document.getElementById("seq-overlay").style.display = "none";
+}
+
+// ══════════════════════════════════════════════════════════════════════
 // CAMPIONATO — aggregazione di più regate in una classifica di stagione
 //
 // Principio: il campionato NON aggrega le singole prove, aggrega i
@@ -3982,7 +4358,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.13";
+const APP_VERSION = "15.16";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
@@ -4001,9 +4377,15 @@ if("serviceWorker" in navigator) {
       setInterval(()=>reg.update(), 60*60*1000);
     } catch(e) { console.warn("Service worker non registrato:", e); }
   });
+  // Alla PRIMA apertura il service worker rivendica il controllo e fa
+  // scattare controllerchange: ricaricare in quel momento produrrebbe un
+  // lampo inutile. Si ricarica solo se un controller c'era già, cioè
+  // quando l'utente ha davvero accettato un aggiornamento.
   let ricaricato = false;
+  const avevaController = !!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener("controllerchange", () => {
-    if(ricaricato) return; ricaricato = true; location.reload();
+    if(!avevaController || ricaricato) return;
+    ricaricato = true; location.reload();
   });
 }
 
