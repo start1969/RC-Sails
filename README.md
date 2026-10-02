@@ -1,4 +1,4 @@
-# RC Sails Scoring — v15.18
+# RC Sails Scoring — v15.20
 
 **Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.**
 
@@ -35,6 +35,8 @@ rc-sails/
     ├── sequenza-partenza.js      22 casi sulla sequenza RRS E3.4
     ├── invio-campionato.js       10 casi sull'invio delle tappe
     ├── installazione.js          10 casi su installazione e persistenza
+    ├── turni-giuria.js           13 casi su esclusioni e riequilibrio dei turni
+    ├── media-giuria.js            7 casi sulla base del punteggio medio
     └── motore.js                 motore estratto da index.html
 ```
 
@@ -100,7 +102,7 @@ e funziona in modalità aereo.
 Quando pubblichi una versione nuova:
 
 1. Modifica i file.
-2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.18` a `rcsails-15.19`).
+2. **Cambia `VERSIONE` in `sw.js`** (es. da `rcsails-15.20` a `rcsails-15.21`).
 
 Senza il passo 2 i dispositivi già installati continuano a usare la copia
 in cache e non vedranno mai le modifiche.
@@ -168,6 +170,30 @@ avviso. È previsto anche il **richiamo generale** con i due suoni della RRS E3.
 
 Sul telefono: alzare il volume e, su iPhone, disattivare la suoneria silenziosa.
 Il pulsante **Prova la voce** permette di verificare tutto prima della partenza.
+
+## Turni di giuria
+
+Quando il giudice a terra è un socio a rotazione, la pagina **Giudici** governa
+chi fa il turno.
+
+Ogni prova è assegnata a chi, **fra i disponibili, ha fatto meno turni** fino a
+quel momento — contando anche quelli già svolti e quelli imposti a mano. Il
+piano si riequilibra da solo: lo scarto fra chi fa più turni e chi ne fa meno
+non supera mai un turno.
+
+Chi lascia la regata o non intende fare il turno si **esclude** dall'elenco
+Disponibilità: le prove non ancora registrate si ridistribuiscono sui restanti,
+mentre **le prove già disputate mantengono il giudice che hanno avuto**. Il
+reintegro è immediato.
+
+Per una singola prova si può imporre un nome dal menù accanto al piano. Il turno
+imposto conta comunque nel bilancio, così le prove successive compensano.
+
+**Base della media.** Il punteggio di chi fa il turno può essere calcolato su
+tutte le prove disputate, oppure **escludendo gli scarti** — cioè sulle sole
+prove che contano per la serie, come avviene per il punteggio di tutti gli altri.
+I punteggi non scartabili (DNE, DGM) restano comunque nella media. La scelta è
+dichiarata nell'estratto delle Istruzioni di Regata.
 
 ## Campionato su più tappe
 

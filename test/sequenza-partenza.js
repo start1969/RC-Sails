@@ -1,3 +1,4 @@
+require('fs').mkdirSync('./schermate',{recursive:true});
 const puppeteer = require('/home/claude/.npm-global/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/puppeteer-core');
 const CHROME = '/home/claude/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome';
 const esiti = []; const T = (d,ok,n) => esiti.push({d,ok,n});
@@ -129,7 +130,7 @@ window.webkitAudioContext = FakeCtx;
   T('Alla partenza compare il via',
     vis.via.n === 'VIA!' && /seq-via/.test(vis.via.c), `"${vis.via.n}" — ${vis.via.f}`);
 
-  await pg.screenshot({ path:'/home/claude/harness/schermate/16-seq-finale.png' });
+  await pg.screenshot({ path:'./schermate/16-seq-finale.png' });
 
   // ── Selettore a due sole durate ─────────────────────────────────────
   const sel = await pg.evaluate(() => {

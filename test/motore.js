@@ -1,7 +1,12 @@
 // RC Sails Scoring — Copyright © 2026 Stefano Ragusa. Tutti i diritti riservati.
-// Estratto automaticamente da index.html — non modificare a mano.
-function saveState(){}
+// Estratto automaticamente dal blocco applicativo di index.html.
+function saveState(){ invalidaPiano(); }
 function renderStandings(){}
+function renderRotation(){}
+function renderBoatList(){}
+function showToast(){}
+let cachePiano = {};
+
 const SCHEMA_VERSION = 15;
 
 const round1 = v => Math.round(v * 10) / 10;
@@ -41,10 +46,52 @@ function getPenalty(raceIdx, sail) {
   return (p && CODES[p.code]) ? p : null;
 }
 
+function disponibileGiuria(b) { return !b.noGiuria; }
+
+function invalidaPiano() { cachePiano = {}; }
+
+function pianoGiuria(fleet) {
+  if(cachePiano[fleet]) return cachePiano[fleet];
+
+  const tutte = getBoatsByFleet(fleet);
+  const liberi = tutte.filter(disponibileGiuria);
+  const turni = new Map(tutte.map(b => [b.sail, 0]));
+  const piano = [];
+
+  for(let r = 0; r < state.config.races; r++) {
+    const race = state.races[r];
+    const ov     = state.overrides && state.overrides[r + "_" + fleet];
+    const cong   = race && race["judge_" + String(fleet).toLowerCase()];
+    let sail = null, fonte = "auto";
+
+    if(ov)        { sail = ov;   fonte = "imposto"; }
+    else if(cong) { sail = cong; fonte = "congelato"; }
+    else if(liberi.length) {
+      // Il meno caricato; a parità vince l'ordine di iscrizione
+      let min = Infinity;
+      for(const b of liberi) {
+        const t = turni.get(b.sail) || 0;
+        if(t < min) { min = t; sail = b.sail; }
+      }
+    }
+    piano.push({ sail, fonte });
+    if(sail != null) turni.set(sail, (turni.get(sail) || 0) + 1);
+  }
+  cachePiano[fleet] = piano;
+  return piano;
+}
+
 function getAutoJudge(raceIdx, fleet) {
-  const boats = getBoatsByFleet(fleet);
-  if(!boats.length) return null;
-  return boats[raceIdx % boats.length].sail;
+  const p = pianoGiuria(fleet)[raceIdx];
+  return p ? p.sail : null;
+}
+
+function contaTurni(fleet) {
+  const c = new Map();
+  pianoGiuria(fleet).forEach(p => {
+    if(p.sail != null) c.set(p.sail, (c.get(p.sail) || 0) + 1);
+  });
+  return c;
 }
 
 function freezeJudge(raceIdx) {
@@ -186,15 +233,37 @@ function calcScore(boat, fleet) {
   }
 
   // RRS A9 — punteggio medio, al decimo di punto con 0,05 per eccesso.
-  // Calcolato sui soli punteggi reali: nessun AVG entra nella media di un altro AVG.
+  // Si usano solo le prove realmente disputate: il filtro su codes esclude
+  // gli altri turni di giuria, anche quelli già risolti in un numero.
+  const proveGiocate = scores.filter(s => s !== null).length;
   for(let i=0;i<scores.length;i++) {
     if(scores[i]!=="AVG") continue;
-    const reali = scores.map((s,k)=>({s,k})).filter(o=>typeof o.s==="number");
-    let base = reali.filter(o=>sc.judgeScore!=="avg-before" || o.k<i).map(o=>o.s);
+
+    const reali = scores.map((s,k)=>({s,k}))
+      .filter(o => typeof o.s === "number" && codes[o.k] !== "AVG");
+
+    let base = reali.filter(o => sc.judgeScore !== "avg-before" || o.k < i);
     // A9(b) alla prima prova non ha precedenti: si ricade sulla media di tutte
     // le altre prove (A9(a)) anziché sul punteggio DNF, che sarebbe punitivo.
-    if(!base.length) base = reali.map(o=>o.s);
-    scores[i] = base.length ? round1(base.reduce((a,b)=>a+b,0)/base.length) : dns;
+    if(!base.length) base = reali;
+
+    // Base della media: tutte le prove, oppure solo quelle che contano per la
+    // serie. Escludere gli scarti evita che la barca di turno sia valutata su
+    // risultati che per tutti gli altri vengono eliminati.
+    if(sc.judgeAvg === "netti" && base.length > 1) {
+      const d = Math.min(getDiscards(proveGiocate), base.length - 1);
+      if(d > 0) {
+        // si tolgono i d peggiori fra gli scartabili: DNE e DGM restano
+        const fuori = new Set(base
+          .filter(o => !noDiscard[o.k])
+          .sort((a,b) => b.s - a.s || a.k - b.k)
+          .slice(0, d).map(o => o.k));
+        base = base.filter(o => !fuori.has(o.k));
+      }
+    }
+
+    const v = base.map(o => o.s);
+    scores[i] = v.length ? round1(v.reduce((a,b)=>a+b,0)/v.length) : dns;
   }
 
   // RRS E7 — punti aggiunti a chi era di turno: si sommano al punteggio medio
@@ -245,4 +314,4 @@ function compareSeries(a, b) {
   return 0;
 }
 
-module.exports={CODES,getBoatsByFleet,getAutoJudge,freezeJudge,getEffectiveJudge,scoringCfg,getDiscards,discardPreview,calcScore,findDiscardIndices,compareSeries,countPlayed,getPenalty,rankedOrder};
+module.exports={CODES,getBoatsByFleet,getAutoJudge,pianoGiuria,contaTurni,disponibileGiuria,invalidaPiano,freezeJudge,getEffectiveJudge,scoringCfg,getDiscards,discardPreview,calcScore,findDiscardIndices,compareSeries,countPlayed,getPenalty,rankedOrder};

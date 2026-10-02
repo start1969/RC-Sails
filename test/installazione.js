@@ -1,3 +1,4 @@
+require('fs').mkdirSync('./schermate',{recursive:true});
 const puppeteer = require('/home/claude/.npm-global/lib/node_modules/@mermaid-js/mermaid-cli/node_modules/puppeteer-core');
 const CHROME = '/home/claude/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome';
 const esiti = []; const T = (d,ok,n) => esiti.push({d,ok,n});
@@ -92,7 +93,7 @@ async function nuovaPagina(b, ua) {
   T('Chiudendo l\'invito non ricompare più',
     rifiuto.memoria === '1' && !rifiuto.ricompare, 'la scelta è ricordata');
 
-  await and.screenshot({ path:'/home/claude/harness/schermate/21-banner.png' });
+  await and.screenshot({ path:'./schermate/21-banner.png' });
   await and.close();
 
   // ══ iPHONE: istruzioni, perché Apple non consente altro ═══════════
@@ -117,7 +118,7 @@ async function nuovaPagina(b, ua) {
     /non consente a una pagina di installarsi da sola/i.test(istr.testo),
     'nessuna promessa che il sistema non può mantenere');
 
-  await ios.screenshot({ path:'/home/claude/harness/schermate/22-ios.png' });
+  await ios.screenshot({ path:'./schermate/22-ios.png' });
   await ios.close();
 
   T('Nessun errore JavaScript', errori.length===0, errori.slice(0,2).join(' | ')||'nessuno');
