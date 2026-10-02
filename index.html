@@ -598,13 +598,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   flex:1;font-weight:600;
 }
 .rot-auto{font-size:.75rem;color:var(--gray4)}
-.rot-override{
-  padding:6px 10px;border-radius:var(--r);border:2px solid var(--gray2);
-  font-family:var(--font-display);font-weight:700;
-  font-size:.9rem;width:70px;text-align:center;outline:none;
-  background:var(--white);color:var(--navy);-webkit-appearance:none;
-}
-.rot-override:focus{border-color:var(--orange)}
+
 /* ── ALERTS ── */
 .alert{
   margin:0 16px 12px;padding:12px 16px;border-radius:var(--r);
@@ -722,7 +716,6 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   background:var(--green)!important;
 }
 
-
 /* ── PROTESTE ── */
 .prot-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--gray2)}
 .prot-item:last-child{border:none}
@@ -811,7 +804,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.22</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.24</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -974,10 +967,10 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 
         <button class="btn btn-outline btn-block" style="margin-top:10px"
           onclick="apriManuale()">
-          &#128214; Manuale dell\u2019Applicazione (PDF)
+          &#128214; Manuale dell’Applicazione (PDF)
         </button>
         <div class="hint">
-          Guida completa all\u2019uso e alla base di calcolo, con le regole applicate.
+          Guida completa all’uso e alla base di calcolo, con le regole applicate.
           Aprilo una volta con la rete: resta poi disponibile anche senza connessione.
         </div>
 
@@ -985,7 +978,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.22</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.24</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -1225,7 +1218,6 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
     </div>
   </div>
 </div>
-
 
 <!-- ══════════════════════════════════════════════════ CAMPIONATO ══════ -->
 <div class="page" id="page-champ">
@@ -1497,22 +1489,10 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <script src="vendor/xlsx.mini.min.js" defer></script>
 <script>
 
-
-
-
-
-
-
-
-
-
-
-
 // ═══════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════
 const LOGO = "assets/logo.png";
-
 
 const DISCARD_TABLE = [
   [1,0],[2,0],[3,0],[4,0],[5,1],[6,1],[7,1],[8,1],
@@ -2511,7 +2491,6 @@ function openPicker(fleet,pos,raceIdx) {
     </div>`;
   }).join("");
 
-
   document.getElementById("picker").style.display="flex";
   pickerCallback={fleet,pos,raceIdx};
 }
@@ -2826,7 +2805,6 @@ function syncUI() {
   renderBoatList();
 }
 
-
 // ══════════════════════════════════════════════════════════════════════
 // EXPORT EXCEL
 // ══════════════════════════════════════════════════════════════════════
@@ -3084,7 +3062,6 @@ function showToast(msg, success=false) {
   setTimeout(()=>{ t.style.opacity="0"; setTimeout(()=>t.remove(),300); }, 3000);
 }
 
-
 // ══════════════════════════════════════════════════════════════════════
 // RACE SUMMARY — riepilogo dopo ogni prova
 // ══════════════════════════════════════════════════════════════════════
@@ -3281,7 +3258,6 @@ function fallbackCopy(text) {
   ta.remove();
 }
 
-
 // ══════════════════════════════════════════════════════════════════════
 // TRASFERIMENTO A CAMPIONATO
 // ══════════════════════════════════════════════════════════════════════
@@ -3461,7 +3437,6 @@ function renderProtestTable() {
       }).join("")}</tbody>
     </table>`;
 }
-
 
 // ══════════════════════════════════════════════════════════════════════
 // INIT
@@ -3862,7 +3837,6 @@ function stampaDoc(tipo) {
     setTimeout(()=>document.body.classList.remove("printing"), 400);
   }, 120);
 }
-
 
 // ══════════════════════════════════════════════════════════════════════
 // INSTALLAZIONE SULLA SCHERMATA HOME
@@ -4851,7 +4825,6 @@ function azzeraCamp() {
     () => { camp.eventi = []; salvaCamp(); renderCamp(); showToast("Campionato azzerato"); });
 }
 
-
 // ── Avviso di avvio ──────────────────────────────────────────────────
 function chiudiSplash() {
   const s = document.getElementById("splash");
@@ -4892,21 +4865,10 @@ syncUI();
 renderBoatList();
 navigate("setup");
 
-
-
-
-
-
-
-
-
-
-
-
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.22";
+const APP_VERSION = "15.24";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
