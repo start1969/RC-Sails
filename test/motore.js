@@ -64,7 +64,7 @@ function pianoGiuria(fleet) {
     const cong   = race && race["judge_" + String(fleet).toLowerCase()];
     let sail = null, fonte = "auto";
 
-    if(ov)        { sail = ov;   fonte = "imposto"; }
+    if(ov)        { sail = ov;   fonte = "sostituto"; }
     else if(cong) { sail = cong; fonte = "congelato"; }
     else if(liberi.length) {
       // Il meno caricato; a parità vince l'ordine di iscrizione

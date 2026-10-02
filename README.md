@@ -186,8 +186,9 @@ Disponibilità: le prove non ancora registrate si ridistribuiscono sui restanti,
 mentre **le prove già disputate mantengono il giudice che hanno avuto**. Il
 reintegro è immediato.
 
-Per una singola prova si può imporre un nome dal menù accanto al piano. Il turno
-imposto conta comunque nel bilancio, così le prove successive compensano.
+Per una singola prova si può indicare un **sostituto** dal menù accanto al piano.
+Il turno del sostituto conta comunque nel bilancio, così le prove successive
+compensano.
 
 **Base della media.** Il punteggio di chi fa il turno può essere calcolato su
 tutte le prove disputate, oppure **escludendo gli scarti** — cioè sulle sole

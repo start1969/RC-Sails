@@ -8,7 +8,7 @@
    condizione normale su un campo di regata.
    ══════════════════════════════════════════════════════════════════════ */
 
-const VERSIONE = 'rcsails-15.21';
+const VERSIONE = 'rcsails-15.22';
 const CACHE    = `rcsails-scoring-${VERSIONE}`;
 
 // Tutto ciò che serve per funzionare offline.
@@ -22,6 +22,9 @@ const RISORSE = [
   './assets/icon-512.png',
   './assets/icon-maskable-512.png',
   './assets/apple-touch-icon.png'
+  // './assets/manuale.pdf' non è precaricato di proposito: pesa quanto
+  // l'applicazione e la maggior parte degli utenti non lo aprirà mai.
+  // Alla prima apertura la strategia cache-first lo conserva comunque.
 ];
 
 // ── Installazione: si precarica tutto ────────────────────────────────

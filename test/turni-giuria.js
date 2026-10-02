@@ -131,15 +131,15 @@ const esiti = []; const T = (d,ok,n) => esiti.push({d,ok,n});
   // ── Imposizione manuale su una prova ────────────────────────────────
   const imposto = await pg.evaluate(() => {
     const libero = state.boats.filter(disponibileGiuria)[0].sail;
-    setOverride(7, 'A', libero);
+    setSostituto(7, 'A', libero);
     const p = pianoGiuria('A');
     const c = {}; p.forEach(x=>{ if(x.sail) c[x.sail]=(c[x.sail]||0)+1; });
     const v = Object.values(c).filter((_,i)=>true);
     return { sail:p[7].sail, fonte:p[7].fonte, atteso:libero, conteggi:c };
   });
-  T('Si può imporre un nome su una singola prova',
-    imposto.sail === imposto.atteso && imposto.fonte === 'imposto',
-    `prova 8 assegnata a ${imposto.sail} (${imposto.fonte})`);
+  T('Si può indicare un sostituto su una singola prova',
+    imposto.sail === imposto.atteso && imposto.fonte === 'sostituto',
+    `prova 8 assegnata al sostituto ${imposto.sail}`);
 
   const dopoImposto = Object.entries(imposto.conteggi)
     .filter(([s]) => s !== uscente).map(([,v]) => v);
@@ -149,7 +149,7 @@ const esiti = []; const T = (d,ok,n) => esiti.push({d,ok,n});
 
   // ── Reintegro ───────────────────────────────────────────────────────
   const reintegro = await pg.evaluate(sail => {
-    setOverride(7,'A','');
+    setSostituto(7,'A','');
     setDisponibileGiuria(sail, true);
     const p = pianoGiuria('A').map(x=>x.sail);
     return { torna: p.slice(5).includes(sail), piano:p };

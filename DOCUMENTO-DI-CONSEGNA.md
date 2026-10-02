@@ -45,7 +45,7 @@ rc-sails/
 ├── sw.js                         service worker — funzionamento offline
 ├── LICENSE                       licenza proprietaria
 ├── THIRD-PARTY-NOTICES.md        conformità Apache 2.0 per SheetJS
-├── assets/                       logo e quattro icone
+├── assets/                       logo, icone e manuale.pdf (non precaricato)
 ├── vendor/
 │   ├── xlsx.mini.min.js          SheetJS CE (Apache 2.0)
 │   └── LICENSE-Apache-2.0.txt

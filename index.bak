@@ -219,35 +219,6 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   color:var(--navy);font-family:var(--font-body);
 }
 .rot-sel:disabled{background:var(--gray1);color:var(--gray3)}
-/* ══ FASCIA DEL GIUDICE DI TURNO ══════════════════════════════════ */
-/* Il nome stava in un distintivo dentro l'intestazione e veniva troncato:
-   qui ha tutta la larghezza e sta al centro. */
-#race-judge-bar{ display:none }
-#race-judge-bar.on{
-  display:flex;align-items:center;justify-content:center;gap:9px;
-  background:#FFF8E1;border-bottom:2px solid var(--gold);
-  padding:9px 12px;flex-shrink:0;text-align:center;
-}
-.rj-eti{
-  font-family:var(--font-display);font-weight:700;font-size:.68rem;
-  letter-spacing:.11em;text-transform:uppercase;color:#8A6D1E;flex-shrink:0;
-}
-.rj-velico{
-  font-family:var(--font-display);font-weight:900;font-size:1.12rem;
-  background:var(--navy);color:#fff;border-radius:var(--r);
-  padding:2px 9px;flex-shrink:0;
-}
-.rj-nome{
-  font-family:var(--font-display);font-weight:900;font-size:1.12rem;
-  color:#7D4000;letter-spacing:.02em;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-}
-.rj-flotta{
-  font-family:var(--font-display);font-weight:700;font-size:.66rem;
-  color:#8A6D1E;border:1.5px solid var(--gold);border-radius:10px;
-  padding:0 5px;flex-shrink:0;
-}
-#race-judge-bar .rj-coppia{display:flex;align-items:center;gap:6px;min-width:0}
 /* ══ INVITO A INSTALLARE ══════════════════════════════════════════ */
 #banner-installa{
   position:fixed;left:10px;right:10px;z-index:1200;
@@ -811,7 +782,7 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
 <div id="splash" role="dialog" aria-modal="true" aria-labelledby="splash-title">
   <div class="splash-box">
     <img class="grcs-logo" src="" alt="" onerror="this.style.display='none'">
-    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.22</span></h2>
+    <h2 id="splash-title">RC Sails Scoring <span id="splash-ver">v15.21</span></h2>
     <p class="splash-sub">
       Punteggi conformi alle RRS 2025-2028,<br>Appendice A e Appendice E.
     </p>
@@ -972,20 +943,11 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
           riferimenti di regola. Da affiggere insieme alla classifica.
         </div>
 
-        <button class="btn btn-outline btn-block" style="margin-top:10px"
-          onclick="apriManuale()">
-          &#128214; Manuale dell\u2019Applicazione (PDF)
-        </button>
-        <div class="hint">
-          Guida completa all\u2019uso e alla base di calcolo, con le regole applicate.
-          Aprilo una volta con la rete: resta poi disponibile anche senza connessione.
-        </div>
-
         <div class="sub-head">Informazioni</div>
         <div style="font-size:.75rem;color:var(--gray4);line-height:1.5">
           <b style="color:var(--navy);font-family:var(--font-display);
              font-size:.95rem;letter-spacing:.05em">RC SAILS SCORING</b>
-          <span id="app-ver" style="color:var(--gray3)">v15.22</span><br>
+          <span id="app-ver" style="color:var(--gray3)">v15.21</span><br>
           Punteggi conformi alle RRS 2025-2028, Appendice A e Appendice E.
           <span style="display:block;margin-top:6px">
             &copy; 2026 Stefano Ragusa — Tutti i diritti riservati.<br>
@@ -1119,7 +1081,6 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
       &#9201;<br>Partenza</button>
     <div class="header-badge" id="race-status-badge" style="margin-left:8px">—</div>
   </div>
-  <div id="race-judge-bar"></div>
   <div class="race-tabs" id="race-tabs"></div>
   <div class="scroll-content" id="race-content">
     <div class="empty-state"><div class="icon">⚓</div><p>Configura la regata prima</p></div>
@@ -1219,9 +1180,8 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
     </div>
     <div class="alert alert-warn" style="font-size:.75rem">
       <span>&#9888;</span><span>Il piano assegna ogni prova a chi ha fatto <b>meno turni</b>
-      fra i disponibili, quindi si riequilibra da solo. Indica un <b>sostituto</b> solo
-      quando serve: il suo turno conta comunque nel bilancio, e le prove successive
-      compensano.</span>
+      fra i disponibili, quindi si riequilibra da solo. Imponi un nome a mano solo
+      quando serve davvero: le prove imposte contano comunque nel bilancio.</span>
     </div>
   </div>
 </div>
@@ -1351,16 +1311,15 @@ html,body{height:100%;overflow:hidden;background:var(--gray1);font-family:var(--
   <button class="nav-btn active" onclick="navigate('setup')" id="nav-setup">
     <span class="icon">⚙️</span>Setup
   </button>
-  <button class="nav-btn" onclick="navigate('rotation')" id="nav-rotation" style="display:none">
-    <span class="icon">&#128260;</span>Giudici
-  </button>
   <button class="nav-btn" onclick="navigate('race')" id="nav-race">
     <span class="icon">🏁</span>Arrivi
   </button>
   <button class="nav-btn" onclick="navigate('standings')" id="nav-standings">
     <span class="icon">🏆</span>Classifica
   </button>
-
+  <button class="nav-btn" onclick="navigate('rotation')" id="nav-rotation" style="display:none">
+    <span class="icon">&#128260;</span>Giudici
+  </button>
   <button class="nav-btn" onclick="navigate('champ')" id="nav-champ">
     <span class="icon">&#127942;</span>Campionato
   </button>
@@ -1884,7 +1843,7 @@ function pianoGiuria(fleet) {
     const cong   = race && race["judge_" + String(fleet).toLowerCase()];
     let sail = null, fonte = "auto";
 
-    if(ov)        { sail = ov;   fonte = "sostituto"; }
+    if(ov)        { sail = ov;   fonte = "imposto"; }
     else if(cong) { sail = cong; fonte = "congelato"; }
     else if(liberi.length) {
       // Il meno caricato; a parità vince l'ordine di iscrizione
@@ -2218,21 +2177,16 @@ function renderCurrentRace() {
   document.getElementById("race-header-title").textContent=`Prova ${r+1}`;
   const useJudge = state.useJudge;
   const judgeEl = document.getElementById("race-header-sub");
-  const barra   = document.getElementById("race-judge-bar");
-
-  const valide = state.races.filter((x,i)=>!x.cancelled && rawFinishes(i,"A").length>0).length;
-  judgeEl.textContent = `${state.boats.length} barche · ${valide}/${state.config.races} prove`;
-
-  if(useJudge && barra) {
-    const coppia = (sail, fl) => `<span class="rj-coppia">
-      <span class="rj-velico">${esc(sail||"—")}</span>
-      <span class="rj-nome">${esc(getBoatName(sail))}</span>
-      ${isMulti?`<span class="rj-flotta">${fl}</span>`:""}</span>`;
-    barra.className = "on";
-    barra.innerHTML = `<span class="rj-eti">&#9878; Di turno</span>`
-      + coppia(judgeA,"A") + (isMulti ? coppia(judgeB,"B") : "");
-  } else if(barra) {
-    barra.className = ""; barra.innerHTML = "";
+  if(useJudge) {
+    const jNames = isMulti
+      ? `${judgeA} — ${getBoatName(judgeA)} (A) &nbsp;/&nbsp; ${judgeB} — ${getBoatName(judgeB)} (B)`
+      : `${judgeA} — ${getBoatName(judgeA)}`;
+    judgeEl.innerHTML = `<span style="background:#FFF8E1;color:#7D4000;
+      font-family:var(--font-display);font-weight:900;font-size:.92rem;
+      padding:3px 10px;border-radius:20px;border:2px solid var(--gold,#D4A017)">
+      &#9878; DI TURNO: ${jNames}</span>`;
+  } else {
+    judgeEl.textContent = `${state.boats.length} barche · tutte in acqua`;
   }
 
   const boatsA=getBoatsByFleet("A").filter(b=>!useJudge||b.sail!==judgeA);
@@ -2698,9 +2652,9 @@ function renderRotation() {
     const fatta = (state.races[r]?.finishes_a || []).length > 0;
 
     const riga = (p, fl) => {
-      const etichetta = { sostituto:"sostituto", congelato:"assegnato alla prova",
+      const etichetta = { imposto:"imposto a mano", congelato:"assegnato alla prova",
                           auto:"automatico" }[p.fonte] || "";
-      const colore = p.fonte === "sostituto" ? "var(--orange,#E67E22)"
+      const colore = p.fonte === "imposto" ? "var(--orange,#E67E22)"
                    : p.fonte === "congelato" ? "var(--green,#27AE60)" : "var(--gray4)";
       return `<div style="font-weight:600">
         ${esc(getBoatName(p.sail))}
@@ -2711,7 +2665,7 @@ function renderRotation() {
     };
 
     const scelta = (fl, p) => `<select class="rot-sel"
-        onchange="setSostituto(${r},'${fl}',this.value)"
+        onchange="setOverride(${r},'${fl}',this.value)"
         ${p.fonte==="congelato"?"disabled title='Prova già registrata: il giudice è fissato'":""}>
         <option value="">Automatico</option>${opzioni(fl)}</select>`;
 
@@ -2769,8 +2723,7 @@ function renderRotation() {
   fair.innerHTML = fhtml || "<p style='color:var(--gray3);text-align:center;padding:12px'>—</p>";
 }
 
-// Sostituto: il nome indicato a mano al posto di quello assegnato dal piano.
-function setSostituto(raceIdx, fleet, val) {
+function setOverride(raceIdx, fleet, val) {
   const key = raceIdx + "_" + fleet;
   const v = (val || "").trim();
   if(v) state.overrides[key] = v; else delete state.overrides[key];
@@ -3843,14 +3796,6 @@ function pieDoc() {
 }
 
 // ── Apertura della finestra di stampa ────────────────────────────────
-// Il manuale non è precaricato all'installazione: pesa quanto l'applicazione
-// e la maggior parte degli utenti non lo aprirà mai. Alla prima apertura il
-// service worker lo mette in cache e da quel momento è disponibile offline.
-function apriManuale() {
-  const w = window.open("assets/manuale.pdf", "_blank");
-  if(!w) showToast("Consenti le finestre per aprire il manuale");
-}
-
 function stampaDoc(tipo) {
   if(!state.boats.length) { showToast("Nessun partecipante inserito"); return; }
   const area = document.getElementById("print-area");
@@ -4906,7 +4851,7 @@ navigate("setup");
 </script>
 <script>
 // ── Installazione e aggiornamenti ────────────────────────────────────
-const APP_VERSION = "15.22";
+const APP_VERSION = "15.21";
 
 if("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
